@@ -82,5 +82,8 @@
   },
   "lint-staged": {
     "*.{js,ts}": "bunx --bun eslint . --fix"
+  },
+  "dependencies": {
+    "garmin-connect": "^1.6.2"
   }
 }
