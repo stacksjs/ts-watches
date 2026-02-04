@@ -11,6 +11,10 @@ export interface BrowserOptions {
   userAgent?: string
   viewportWidth?: number
   viewportHeight?: number
+  /** Use a clean/isolated browser profile (no shared sessions) */
+  incognito?: boolean
+  /** Custom user data directory */
+  userDataDir?: string
 }
 
 interface CDPMessage {
@@ -43,6 +47,8 @@ export class Browser {
   private debuggerUrl: string | null = null
   private eventListeners = new Map<string, ((params: unknown) => void)[]>()
 
+  private userDataDir: string | null = null
+
   constructor(options: BrowserOptions = {}) {
     this.options = {
       executablePath: options.executablePath || this.findChrome(),
@@ -51,7 +57,9 @@ export class Browser {
       userAgent: options.userAgent || 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       viewportWidth: options.viewportWidth ?? 1280,
       viewportHeight: options.viewportHeight ?? 800,
-    }
+      incognito: options.incognito ?? true, // Default to isolated profile
+      userDataDir: options.userDataDir,
+    } as Required<BrowserOptions>
   }
 
   private findChrome(): string {
@@ -84,6 +92,14 @@ export class Browser {
   }
 
   async launch(): Promise<void> {
+    // Create temp user data dir for isolated profile
+    if ((this.options as BrowserOptions).incognito) {
+      this.userDataDir = `/tmp/tp-chrome-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      // Create the directory
+      const mkdirProc = Bun.spawn(['mkdir', '-p', this.userDataDir], { stdout: 'ignore', stderr: 'ignore' })
+      await mkdirProc.exited
+    }
+
     const args = [
       this.options.headless ? '--headless=new' : '',
       '--disable-gpu',
@@ -113,6 +129,10 @@ export class Browser {
       '--no-first-run',
       '--password-store=basic',
       '--use-mock-keychain',
+      // Use isolated profile
+      this.userDataDir ? `--user-data-dir=${this.userDataDir}` : '',
+      // Run in incognito mode for true isolation
+      (this.options as BrowserOptions).incognito ? '--incognito' : '',
     ].filter(Boolean)
 
     this.process = Bun.spawn([this.options.executablePath, ...args], {
@@ -329,34 +349,45 @@ export class Browser {
   async type(selector: string, text: string): Promise<void> {
     const escapedSelector = selector.replace(/'/g, "\\'")
 
-    // Focus the element
-    await this.send('Runtime.evaluate', {
-      expression: `document.querySelector('${escapedSelector}')?.focus()`,
-    })
+    // Set value directly via JavaScript for reliability
+    const result = await this.send('Runtime.evaluate', {
+      expression: `
+        (function() {
+          const el = document.querySelector('${escapedSelector}');
+          if (!el) return { success: false, error: 'Element not found' };
 
-    // Type each character
-    for (const char of text) {
-      await this.send('Input.dispatchKeyEvent', {
-        type: 'keyDown',
-        text: char,
-      })
-      await this.send('Input.dispatchKeyEvent', {
-        type: 'keyUp',
-        text: char,
-      })
-      await new Promise(r => setTimeout(r, 50))
+          // Focus the element
+          el.focus();
+
+          // Clear and set value
+          el.value = '${text.replace(/'/g, "\\'")}';
+
+          // Trigger events
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+
+          return { success: true, value: el.value };
+        })()
+      `,
+      returnByValue: true,
+    }) as { result: { value: { success: boolean, error?: string, value?: string } } }
+
+    if (!result.result.value?.success) {
+      throw new Error(`Failed to type into ${selector}: ${result.result.value?.error || 'unknown error'}`)
     }
   }
 
   async click(selector: string): Promise<void> {
     const escapedSelector = selector.replace(/'/g, "\\'")
 
-    // Get element position
+    // Scroll element into view and get position
     const result = await this.send('Runtime.evaluate', {
       expression: `
         (function() {
           const el = document.querySelector('${escapedSelector}');
           if (!el) return null;
+          el.scrollIntoView({ behavior: 'instant', block: 'center' });
           const rect = el.getBoundingClientRect();
           return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
         })()
@@ -370,7 +401,13 @@ export class Browser {
 
     const { x, y } = result.result.value
 
+    // Move mouse first
+    await this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y })
+    await new Promise(r => setTimeout(r, 50))
+
+    // Click
     await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 })
+    await new Promise(r => setTimeout(r, 50))
     await this.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 })
   }
 
@@ -378,6 +415,22 @@ export class Browser {
     const selector = formSelector ? formSelector.replace(/'/g, "\\'") : 'form'
     await this.send('Runtime.evaluate', {
       expression: `document.querySelector('${selector}')?.submit()`,
+    })
+  }
+
+  /**
+   * Click element using JavaScript click() - more reliable for buttons
+   */
+  async jsClick(selector: string): Promise<void> {
+    const escapedSelector = selector.replace(/'/g, "\\'")
+    await this.send('Runtime.evaluate', {
+      expression: `
+        const el = document.querySelector('${escapedSelector}');
+        if (el) {
+          el.scrollIntoView({ behavior: 'instant', block: 'center' });
+          el.click();
+        }
+      `,
     })
   }
 
@@ -413,6 +466,25 @@ export class Browser {
 
   async clearCookies(): Promise<void> {
     await this.send('Network.clearBrowserCookies')
+    await this.send('Network.clearBrowserCache')
+  }
+
+  async clearAllStorage(): Promise<void> {
+    await this.send('Network.clearBrowserCookies')
+    await this.send('Network.clearBrowserCache')
+    // Clear storage for the origin
+    await this.send('Storage.clearDataForOrigin', {
+      origin: 'https://trainingpeaks.com',
+      storageTypes: 'all',
+    })
+    await this.send('Storage.clearDataForOrigin', {
+      origin: 'https://home.trainingpeaks.com',
+      storageTypes: 'all',
+    })
+    await this.send('Storage.clearDataForOrigin', {
+      origin: 'https://app.trainingpeaks.com',
+      storageTypes: 'all',
+    })
   }
 
   /**
@@ -461,6 +533,17 @@ export class Browser {
     if (this.process) {
       this.process.kill()
       this.process = null
+    }
+
+    // Clean up temp user data dir
+    if (this.userDataDir) {
+      try {
+        const proc = Bun.spawn(['rm', '-rf', this.userDataDir], { stdout: 'ignore', stderr: 'ignore' })
+        await proc.exited
+      } catch {
+        // Ignore cleanup errors
+      }
+      this.userDataDir = null
     }
   }
 }

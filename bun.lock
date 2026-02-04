@@ -32,6 +32,7 @@
       },
       "dependencies": {
         "ts-garmin": "workspace:*",
+        "ts-trainingpeaks": "workspace:*",
       },
       "devDependencies": {
         "@stacksjs/clapp": "^0.2.0",
