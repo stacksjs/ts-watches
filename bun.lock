@@ -16,6 +16,14 @@
         "@types/bun": "latest",
       },
     },
+    "packages/ts-trainingpeaks": {
+      "name": "ts-trainingpeaks",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/ts-watches": {
       "name": "ts-watches",
       "version": "0.1.0",
@@ -326,6 +334,8 @@
     "ts-garmin": ["ts-garmin@workspace:packages/ts-garmin"],
 
     "ts-pkgx": ["ts-pkgx@0.4.88", "", { "optionalDependencies": { "chromium-bidi": "^7.2.0", "electron": "^37.4.0", "js-yaml": "^4.1.0", "playwright": "^1.55.0" }, "bin": { "ts-pkgx": "dist/bin/cli.js" } }, "sha512-VL9G/3QQbintDF/3uE5aabwSBvnv2xKdcKAsYyluUGKSnWD4zhgjIYvQxpnWvr6XuDvClc3wJPhA+RSfgbAAmg=="],
+
+    "ts-trainingpeaks": ["ts-trainingpeaks@workspace:packages/ts-trainingpeaks"],
 
     "ts-watches": ["ts-watches@workspace:packages/ts-watches"],
 
