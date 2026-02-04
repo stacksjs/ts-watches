@@ -1,93 +1,126 @@
-<p align="center"><img src="https://github.com/stacksjs/rpx/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
+# Introduction
 
-# A Better Developer Experience
+ts-watches is a comprehensive TypeScript library for downloading, parsing, and analyzing data from smartwatches and fitness devices.
 
-> A TypeScript Starter Kit that will help you bootstrap your next project without minimal opinion.
+[[toc]]
 
-# ts-starter-monorepo
+## Why ts-watches?
 
-This is an opinionated TypeScript Starter kit to help kick-start development of your next Bun package.
+Working with fitness device data is challenging:
 
-## Get Started
+- **Proprietary formats** - Each manufacturer uses different file formats (FIT, HRM, SML, XML)
+- **Complex protocols** - Binary FIT files require careful parsing of headers, definitions, and data messages
+- **Fragmented APIs** - Cloud services like Garmin Connect and Strava have different authentication flows
+- **Missing tooling** - Most existing libraries are incomplete or lack TypeScript support
 
-It's rather simple to get your package development started:
+ts-watches solves these problems with:
 
-```bash
-# you may use this GitHub template or the following command:
-bunx degit stacksjs/ts-starter-monorepo my-monorepo
-cd my-monorepo
+- **Unified API** - One consistent interface across all device manufacturers
+- **Complete FIT parser** - Full implementation of Garmin's FIT protocol with zero dependencies
+- **Type safety** - Comprehensive TypeScript types for excellent developer experience
+- **Batteries included** - Export, analysis, cloud sync, and real-time streaming built-in
 
- # if you don't have pnpm installed, run `npm i -g pnpm`
-bun i # install all deps
-bun run build # builds the library for production-ready use
+## Supported Devices
 
-# after you have successfully committed, you may create a "release"
-bun run release # automates git commits, versioning, and changelog generations
+| Manufacturer | Formats | Features |
+|--------------|---------|----------|
+| Garmin | FIT | Activities, monitoring, sleep, stress, HRV |
+| Polar | HRM, JSON | Heart rate, activities |
+| Suunto | SML (XML) | Activities with GPS |
+| Coros | FIT | Activities, running power |
+| Wahoo | FIT | Cycling activities |
+| Apple Watch | Health XML | Workouts, health metrics |
+
+## Core Features
+
+### Device Detection & Download
+
+Automatically detect connected devices and download data:
+
+```typescript
+import { createGarminDriver } from 'ts-watches'
+
+const driver = createGarminDriver()
+const devices = await driver.detectDevices()
+
+if (devices.length > 0) {
+  const result = await driver.downloadData(devices[0], {
+    outputDir: './data',
+    includeActivities: true,
+    includeMonitoring: true,
+  })
+}
 ```
 
-_Check out the package.json scripts for more commands._
+### FIT File Parsing
 
-### Developer Experience (DX)
+Parse any FIT file with full field support:
 
-This Starter Kit comes pre-configured with the following:
+```typescript
+const activity = await driver.parseActivityFile('./activity.fit')
 
-- [Powerful Build Process](https://github.com/oven-sh/bun) - via Bun
-- [Fully Typed APIs](https://www.typescriptlang.org/) - via TypeScript
-- [Documentation-ready](https://vitepress.dev/) - via VitePress
-- [CLI & Binary](https://www.npmjs.com/package/bunx) - via Bun & CAC
-- [Be a Good Commitizen](https://www.npmjs.com/package/git-cz) - pre-configured Commitizen & git-cz setup to simplify semantic git commits, versioning, and changelog generations
-- [Built With Testing In Mind](https://bun.sh/docs/cli/test) - pre-configured unit-testing powered by [Bun](https://bun.sh/docs/cli/test)
-- [Renovate](https://renovatebot.com/) - optimized & automated PR dependency updates
-- [ESLint](https://eslint.org/) - for code linting _(and formatting)_
-- [GitHub Actions](https://github.com/features/actions) - runs your CI _(fixes code style issues, tags releases & creates its changelogs, runs the test suite, etc.)_
+console.log(`Sport: ${activity.sport}`)
+console.log(`Distance: ${(activity.totalDistance / 1000).toFixed(2)} km`)
+console.log(`Duration: ${Math.floor(activity.totalTime / 60)} min`)
+console.log(`Avg HR: ${activity.avgHeartRate} bpm`)
+console.log(`Calories: ${activity.calories}`)
+```
 
-## Changelog
+### Data Export
 
-Please see our [releases](https://github.com/stacksjs/stacks/releases) page for more information on what has changed recently.
+Export to multiple formats:
 
-## Stargazers
+```typescript
+import { activityToGpx, activityToTcx, activityToCsv } from 'ts-watches'
 
-[![Stargazers](https://starchart.cc/stacksjs/ts-starter.svg?variant=adaptive)](https://starchart.cc/stacksjs/ts-starter)
+// GPX with extensions
+const gpx = activityToGpx(activity)
 
-## Contributing
+// TCX for Strava
+const tcx = activityToTcx(activity)
 
-Please review the [Contributing Guide](https://github.com/stacksjs/contributing) for details.
+// CSV for spreadsheets
+const csv = activityToCsv(activity)
+```
 
-## Community
+### Training Analysis
 
-For help, discussion about best practices, or any other conversation that would benefit from being searchable:
+Calculate training metrics and predict race times:
 
-[Discussions on GitHub](https://github.com/stacksjs/stacks/discussions)
+```typescript
+import { calculateTSS, RacePredictor, ZoneCalculator } from 'ts-watches'
 
-For casual chit-chat with others using this package:
+// Training Stress Score
+const tss = calculateTSS(activity, { ftp: 250 })
 
-[Join the Stacks Discord Server](https://discord.gg/stacksjs)
+// Race predictions
+const predictor = new RacePredictor()
+const times = predictor.predictFromPerformance(5000, 20 * 60) // 5K in 20:00
 
-## Postcardware
+// Zone analysis
+const zones = new ZoneCalculator({ maxHR: 185, restingHR: 50 })
+const analysis = zones.analyzeActivity(activity)
+```
 
-Two things are true: Stacks OSS will always stay open-source, and we do love to receive postcards from wherever Stacks is used! 🌍 _We also publish them on our website. And thank you, Spatie_
+## Architecture
 
-Our address: Stacks.js, 12665 Village Ln #2306, Playa Vista, CA 90094
+ts-watches is organized into modules:
 
-## Sponsors
+```
+ts-watches/
+├── fit/          # FIT protocol parser
+├── drivers/      # Device-specific drivers
+├── export/       # GPX, TCX, CSV, GeoJSON
+├── cloud/        # Garmin Connect, Strava
+├── analysis/     # Training metrics, zones
+├── workouts/     # Workout builder, courses
+├── realtime/     # ANT+, BLE, live tracking
+└── types.ts      # Core type definitions
+```
 
-We would like to extend our thanks to the following sponsors for funding Stacks development. If you are interested in becoming a sponsor, please reach out to us.
+## Next Steps
 
-- [JetBrains](https://www.jetbrains.com/)
-- [The Solana Foundation](https://solana.com/)
-
-## Credits
-
-- [Chris Breuer](https://github.com/chrisbbreuer)
-- [All Contributors](https://github.com/stacksjs/rpx/graphs/contributors)
-
-## License
-
-The MIT License (MIT). Please see [LICENSE](https://github.com/stacksjs/ts-starter-monorepo/tree/main/LICENSE.md) for more information.
-
-Made with 💙
-
-<!-- Badges -->
-
-<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/rpx/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/rpx -->
+- [Installation](./install.md) - Get ts-watches set up in your project
+- [Usage Guide](./usage.md) - Learn the core APIs
+- [Configuration](./config.md) - Customize behavior
+- [API Reference](./api.md) - Full type documentation

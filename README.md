@@ -8,16 +8,65 @@
 
 # ts-watches
 
-A TypeScript library for downloading and parsing data from smartwatches. Currently supports Garmin devices with FIT file parsing.
+A comprehensive TypeScript library for downloading, parsing, and analyzing data from smartwatches and fitness devices. Supports Garmin, Polar, Suunto, Coros, Wahoo, and Apple Watch with full FIT file parsing, cloud integrations, training analysis, and real-time data streaming.
 
 ## Features
 
-- **Garmin Device Detection** - Automatically detect connected Garmin watches via USB
-- **FIT File Parser** - Full support for Garmin's FIT protocol
-- **Activity Data** - Parse runs, rides, swims, hikes, and more with full metrics
-- **Health Monitoring** - Heart rate, sleep, stress, SpO2, HRV, respiration data
-- **CLI Tool** - Download and parse data from the command line
-- **TypeScript** - Fully typed APIs for excellent DX
+### Device Support
+
+- **Garmin** - Full FIT file parsing for activities, monitoring, sleep, stress, HRV
+- **Polar** - HRM and JSON file format support
+- **Suunto** - SML (XML) format parsing
+- **Coros** - FIT file support with device detection
+- **Wahoo** - FIT file support for ELEMNT devices
+- **Apple Watch** - Health XML export parsing
+
+### Data Parsing
+
+- **FIT Protocol** - Complete binary parser for Garmin's FIT format
+- **Activity Data** - Runs, rides, swims, hikes with full GPS and metrics
+- **Health Monitoring** - Heart rate, sleep, stress, SpO2, HRV, respiration
+- **Training Metrics** - TSS, IF, NP, training load calculations
+
+### Data Export
+
+- **GPX 1.1** - With Garmin TrackPoint extensions for heart rate, cadence, power
+- **TCX** - Training Center XML format for Strava and other platforms
+- **CSV** - Flexible export for activities and monitoring data
+- **GeoJSON** - For mapping applications with Douglas-Peucker simplification
+
+### Cloud Integrations
+
+- **Garmin Connect** - Download activities, daily summaries, sleep, stress, body battery
+- **Strava** - OAuth authentication, activity upload, stream data retrieval
+
+### Training Analysis
+
+- **Training Load** - TSS, ATL, CTL, TSB calculations with recommendations
+- **Personal Records** - Track PRs for various distances and metrics
+- **Heart Rate Zones** - Percentage, Karvonen (reserve), LTHR-based calculations
+- **Power Zones** - FTP-based zone calculations
+- **Race Predictor** - Riegel formula predictions, VO2max estimation, training paces
+- **Running Dynamics** - Form analysis, ground contact time, vertical oscillation
+
+### Workout Tools
+
+- **Workout Builder** - Fluent API for creating structured workouts
+- **Course Builder** - Create GPS courses with waypoints
+- **Training Plans** - Generate marathon and 5K training plans
+- **iCal Export** - Export training plans to calendar format
+
+### Real-time Data
+
+- **ANT+** - Heart rate, power, speed/cadence sensor protocols
+- **Bluetooth LE** - BLE GATT services for fitness devices
+- **Live Tracking** - Real-time position and metrics sharing
+
+### Developer Experience
+
+- **CLI Tool** - Download, parse, and analyze from command line
+- **TypeScript** - Fully typed APIs with comprehensive type exports
+- **Zero Dependencies** - Core FIT parser has no external dependencies
 
 ## Install
 
@@ -25,9 +74,7 @@ A TypeScript library for downloading and parsing data from smartwatches. Current
 bun install ts-watches
 ```
 
-## Usage
-
-### As a Library
+## Quick Start
 
 ```typescript
 import { createGarminDriver } from 'ts-watches'
@@ -49,13 +96,120 @@ if (devices.length > 0) {
   console.log(`Downloaded ${result.activities.length} activities`)
   console.log(`Downloaded ${result.monitoring.size} days of monitoring data`)
 }
-
-// Parse a single FIT file
-const activity = await driver.parseActivityFile('/path/to/activity.fit')
-console.log(`${activity.sport}: ${activity.totalDistance / 1000}km`)
 ```
 
-### CLI
+## Usage Examples
+
+### Parse FIT Files
+
+```typescript
+import { createGarminDriver } from 'ts-watches'
+
+const driver = createGarminDriver()
+const activity = await driver.parseActivityFile('/path/to/activity.fit')
+
+console.log(`${activity.sport}: ${(activity.totalDistance / 1000).toFixed(2)}km`)
+console.log(`Duration: ${Math.floor(activity.totalTime / 60)} minutes`)
+console.log(`Avg HR: ${activity.avgHeartRate} bpm`)
+```
+
+### Export to GPX
+
+```typescript
+import { activityToGpx, activityToTcx, activityToCsv } from 'ts-watches'
+
+// Export activity to GPX
+const gpx = activityToGpx(activity)
+await Bun.write('activity.gpx', gpx)
+
+// Export to TCX for Strava upload
+const tcx = activityToTcx(activity)
+await Bun.write('activity.tcx', tcx)
+
+// Export to CSV for analysis
+const csv = activityToCsv(activity)
+await Bun.write('activity.csv', csv)
+```
+
+### Training Analysis
+
+```typescript
+import { calculateTSS, ZoneCalculator, RacePredictor } from 'ts-watches'
+
+// Calculate Training Stress Score
+const tss = calculateTSS(activity, { ftp: 250 })
+
+// Analyze zones
+const zones = new ZoneCalculator({ maxHR: 185, restingHR: 50, ftp: 250 })
+const zoneAnalysis = zones.analyzeActivity(activity)
+
+// Predict race times
+const predictor = new RacePredictor()
+const predictions = predictor.predictFromPerformance(5000, 20 * 60) // 5K in 20min
+console.log(`Predicted marathon: ${predictions.marathon}`)
+```
+
+### Cloud Integration
+
+```typescript
+import { GarminConnectClient, StravaClient } from 'ts-watches'
+
+// Garmin Connect
+const garmin = new GarminConnectClient()
+await garmin.login('email@example.com', 'password')
+const activities = await garmin.getActivities(new Date('2024-01-01'))
+
+// Strava
+const strava = new StravaClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+})
+const authUrl = strava.getAuthorizationUrl('http://localhost:3000/callback')
+```
+
+### Build Workouts
+
+```typescript
+import { WorkoutBuilder, workoutTemplates } from 'ts-watches'
+
+// Use a template
+const intervals = workoutTemplates.vo2maxIntervals({ ftp: 250 })
+
+// Or build custom workout
+const workout = new WorkoutBuilder('Custom Threshold')
+  .warmup({ duration: 600, targetPower: { min: 100, max: 150 } })
+  .interval({ duration: 1200, targetPower: { min: 240, max: 260 } })
+  .recovery({ duration: 300, targetPower: { min: 100, max: 130 } })
+  .repeat(4)
+  .cooldown({ duration: 600, targetPower: { min: 100, max: 130 } })
+  .build()
+```
+
+### Real-time Data
+
+```typescript
+import { createLiveTracking, createBleScanner } from 'ts-watches'
+
+// Live tracking
+const tracker = createLiveTracking({
+  updateInterval: 5000,
+  onUpdate: (session) => console.log(`Distance: ${session.totalDistance}m`),
+})
+
+tracker.start('Morning Run')
+tracker.updatePosition({ lat: 37.7749, lng: -122.4194, altitude: 10 })
+
+// BLE sensors
+const ble = createBleScanner()
+await ble.startScanning()
+ble.on('data', (device, data) => {
+  if (data.type === 'heart_rate') {
+    console.log(`HR: ${data.data.heartRate} bpm`)
+  }
+})
+```
+
+## CLI
 
 ```bash
 # Detect connected watches
@@ -89,90 +243,57 @@ watch watch
 - Swimming (pool, open water)
 - Hiking, Walking
 - Strength training, Cardio, HIIT
-- And many more...
+- Multisport (triathlon)
+- And 50+ more sport types
 
-### Activity Metrics
+### Health Metrics
 
-- Duration, distance, calories
-- Heart rate (avg, max, zones)
-- Pace/speed
-- Cadence
-- Power (for cycling)
-- Elevation gain/loss
-- GPS track with coordinates
-- Lap splits
-- Training metrics (TSS, IF, NP)
+| Metric | Description |
+|--------|-------------|
+| Heart Rate | Continuous monitoring, resting HR, zones |
+| Sleep | Duration, stages (light, deep, REM), score |
+| Stress | Stress levels throughout the day |
+| Body Battery | Energy levels based on HRV |
+| SpO2 | Blood oxygen saturation |
+| Respiration | Breathing rate |
+| HRV | Heart rate variability (RMSSD, SDRR) |
+| Steps | Daily count, goals, intensity minutes |
 
-### Health & Monitoring
+### Training Metrics
 
-- **Heart Rate** - Continuous monitoring, resting HR
-- **Sleep** - Duration, stages (light, deep, REM), sleep score
-- **Stress** - Stress levels throughout the day
-- **Body Battery** - Energy levels
-- **SpO2** - Blood oxygen saturation
-- **Respiration** - Breathing rate
-- **HRV** - Heart rate variability
-- **Steps** - Daily step count and goals
-
-## API Reference
-
-### `createGarminDriver()`
-
-Creates a new Garmin driver instance.
-
-```typescript
-const driver = createGarminDriver()
-```
-
-### `driver.detectDevices()`
-
-Detects connected Garmin devices.
-
-```typescript
-const devices: GarminDevice[] = await driver.detectDevices()
-```
-
-### `driver.downloadData(device, options)`
-
-Downloads data from a connected device.
-
-```typescript
-const result = await driver.downloadData(device, {
-  outputDir: './data',        // Output directory
-  includeActivities: true,    // Download activities
-  includeMonitoring: true,    // Download monitoring data
-  since: new Date('2024-01-01'), // Filter by date
-  until: new Date(),
-  copyRawFiles: true,         // Copy original FIT files
-})
-```
-
-### `driver.parseActivityFile(path)`
-
-Parses a FIT activity file.
-
-```typescript
-const activity: Activity = await driver.parseActivityFile('/path/to/file.fit')
-```
-
-### `driver.parseMonitoringFile(path)`
-
-Parses a FIT monitoring file.
-
-```typescript
-const data: MonitoringData = await driver.parseMonitoringFile('/path/to/file.fit')
-```
+| Metric | Description |
+|--------|-------------|
+| TSS | Training Stress Score |
+| IF | Intensity Factor |
+| NP | Normalized Power |
+| ATL | Acute Training Load |
+| CTL | Chronic Training Load (Fitness) |
+| TSB | Training Stress Balance (Form) |
+| TRIMP | Training Impulse |
 
 ## Device Setup
 
-For the driver to detect your Garmin watch:
+### Garmin
 
 1. Connect your watch via USB
-2. On the watch, go to **Settings > System > USB Mode**
-3. Select **Mass Storage** (not "Garmin" or "Charging")
-4. Close Garmin Express if it's running (it locks the device)
+2. On the watch: **Settings > System > USB Mode > Mass Storage**
+3. Close Garmin Express (it locks the device)
+4. The watch appears as `/Volumes/GARMIN` on macOS
 
-The watch should appear as a mounted drive (e.g., `/Volumes/GARMIN` on macOS).
+### Polar
+
+1. Export data from Polar Flow web interface
+2. Or use Polar's data export feature on the device
+
+### Apple Watch
+
+1. Open Health app on iPhone
+2. Tap profile > Export All Health Data
+3. Extract the ZIP file
+
+## API Reference
+
+See the [full API documentation](./docs/api.md) for detailed type definitions and method signatures.
 
 ## Testing
 
@@ -202,7 +323,7 @@ For casual chit-chat with others using this package:
 
 "Software that is free, but hopes for a postcard." We love receiving postcards from around the world showing where Stacks is being used! We showcase them on our website too.
 
-Our address: Stacks.js, 12665 Village Ln #2306, Playa Vista, CA 90094, United States 🌎
+Our address: Stacks.js, 12665 Village Ln #2306, Playa Vista, CA 90094, United States
 
 ## Sponsors
 
