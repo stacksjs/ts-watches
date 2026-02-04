@@ -1,0 +1,5 @@
+export { TrainingPeaks, default } from './TrainingPeaks'
+export type { TrainingPeaksConfig } from './TrainingPeaks'
+export * from './types'
+export { Browser } from './browser'
+export { HttpClient } from './http'
