@@ -8,6 +8,21 @@ export * from './fit'
 // Device drivers
 export * from './drivers'
 
+// Data export
+export * from './export'
+
+// Cloud integrations
+export * from './cloud'
+
+// Analysis tools
+export * from './analysis'
+
+// Workout tools
+export * from './workouts'
+
+// Real-time data
+export * from './realtime'
+
 // Re-export commonly used types for convenience
 export type {
   Activity,
@@ -26,4 +41,7 @@ export type {
   DailyHeartRate,
   BodyBattery,
   DailySteps,
+  GeoPosition,
+  SportType,
+  SubSportType,
 } from './types'

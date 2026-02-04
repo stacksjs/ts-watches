@@ -1,1 +1,6 @@
 export * from './garmin'
+export * from './polar'
+export * from './suunto'
+export * from './coros'
+export * from './wahoo'
+export * from './apple'
