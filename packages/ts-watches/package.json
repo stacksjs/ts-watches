@@ -1,0 +1,86 @@
+{
+  "name": "ts-watches",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "TypeScript library for downloading and parsing data from smartwatches (Garmin, etc.)",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-watches#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-watches.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stacksjs/ts-watches/issues"
+  },
+  "keywords": [
+    "garmin",
+    "watches",
+    "smartwatch",
+    "fitness",
+    "fit",
+    "fit-file",
+    "activity",
+    "health",
+    "typescript",
+    "bun"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./fit": {
+      "types": "./dist/src/fit/index.d.ts",
+      "import": "./dist/src/fit/index.js"
+    },
+    "./drivers": {
+      "types": "./dist/src/drivers/index.d.ts",
+      "import": "./dist/src/drivers/index.js"
+    },
+    "./*": {
+      "import": "./dist/*"
+    }
+  },
+  "module": "./dist/src/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "watch": "./dist/bin/cli.js"
+  },
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun --bun build.ts && bun run compile",
+    "compile": "bun build ./bin/cli.ts --compile --minify --outfile bin/watch",
+    "compile:all": "bun run compile:linux-x64 && bun run compile:linux-arm64 && bun run compile:windows-x64 && bun run compile:darwin-x64 && bun run compile:darwin-arm64",
+    "compile:linux-x64": "bun build ./bin/cli.ts --compile --minify --target=bun-linux-x64 --outfile bin/watch-linux-x64",
+    "compile:linux-arm64": "bun build ./bin/cli.ts --compile --minify --target=bun-linux-arm64 --outfile bin/watch-linux-arm64",
+    "compile:windows-x64": "bun build ./bin/cli.ts --compile --minify --target=bun-windows-x64 --outfile bin/watch-windows-x64.exe",
+    "compile:darwin-x64": "bun build ./bin/cli.ts --compile --minify --target=bun-darwin-x64 --outfile bin/watch-darwin-x64",
+    "compile:darwin-arm64": "bun build ./bin/cli.ts --compile --minify --target=bun-darwin-arm64 --outfile bin/watch-darwin-arm64",
+    "zip": "bun run zip:all",
+    "zip:all": "bun run zip:linux-x64 && bun run zip:linux-arm64 && bun run zip:windows-x64 && bun run zip:darwin-x64 && bun run zip:darwin-arm64",
+    "zip:linux-x64": "zip -j bin/watch-linux-x64.zip bin/watch-linux-x64",
+    "zip:linux-arm64": "zip -j bin/watch-linux-arm64.zip bin/watch-linux-arm64",
+    "zip:windows-x64": "zip -j bin/watch-windows-x64.zip bin/watch-windows-x64.exe",
+    "zip:darwin-x64": "zip -j bin/watch-darwin-x64.zip bin/watch-darwin-x64",
+    "zip:darwin-arm64": "zip -j bin/watch-darwin-arm64.zip bin/watch-darwin-arm64",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
+    "changelog": "bunx changelogen --output CHANGELOG.md",
+    "prepublishOnly": "bun --bun run build && bun run compile:all && bun run zip",
+    "release": "bun run changelog && bunx bumpp package.json --all",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@stacksjs/clapp": "^0.2.0",
+    "@types/bun": "latest",
+    "bunfig": "^0.15.6"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "bunx --bun eslint . --fix"
+  }
+}

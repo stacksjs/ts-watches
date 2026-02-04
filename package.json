@@ -1,0 +1,39 @@
+{
+  "name": "ts-watches",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Like our `ts-starter`, but optimized for monorepos.",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-starter-monorepo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-starter-monorepo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stacksjs/ts-starter-monorepo/issues"
+  },
+  "keywords": [
+    "monorepo",
+    "ts-starter",
+    "ts-starter-monorepo",
+    "template"
+  ],
+  "scripts": {
+    "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
+    "test": "bun test",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "changelog": "bunx logsmith --verbose",
+    "changelog:generate": "bunx logsmith --output CHANGELOG.md",
+    "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
+    "dev:docs": "bun --bun vitepress dev docs",
+    "build:docs": "bun --bun vitepress build docs",
+    "preview:docs": "bun --bun vitepress preview docs",
+    "typecheck": "bun --bun tsc --noEmit"
+  },
+  "devDependencies": {
+    "better-dx": "^0.2.3"
+  }
+}
