@@ -27,6 +27,10 @@ export interface GarminDevice extends WatchDevice {
   type: 'garmin'
   unitId?: string
   partNumber?: string
+  /** True if device data is from Garmin Express cache (MTP mode) */
+  isGarminExpress?: boolean
+  /** Path to Garmin Express sync directory */
+  garminExpressPath?: string
 }
 
 // ============================================================================

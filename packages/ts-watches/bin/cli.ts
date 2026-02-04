@@ -41,9 +41,8 @@ cli
     if (devices.length === 0) {
       console.log('No watch devices found.')
       console.log('\nMake sure your watch is:')
-      console.log('  1. Connected via USB')
-      console.log('  2. In Mass Storage mode (Settings > System > USB Mode)')
-      console.log('  3. Garmin Express is closed (it may lock the device)')
+      console.log('  1. Connected via USB, or')
+      console.log('  2. Synced via Garmin Express (data will be read from cache)')
       return
     }
 
@@ -52,9 +51,14 @@ cli
     for (const device of devices) {
       console.log(`  ${device.name}`)
       console.log(`    Type: ${device.type}`)
-      console.log(`    Path: ${device.path}`)
+      if (device.isGarminExpress) {
+        console.log(`    Source: Garmin Express cache`)
+      } else {
+        console.log(`    Path: ${device.path}`)
+      }
       if (device.model) console.log(`    Model: ${device.model}`)
       if (device.serial) console.log(`    Serial: ${device.serial}`)
+      if (device.firmware) console.log(`    Firmware: ${device.firmware}`)
       console.log()
     }
   })

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, statSync, mkdirSync, copyFileSync, readFileSync } from 'fs'
 import { join, basename, extname } from 'path'
+import { homedir } from 'os'
 import type {
   WatchDriver,
   GarminDevice,
@@ -12,6 +13,9 @@ import type {
 import { FitParser, FitDecoder } from '../fit'
 
 const VOLUMES_PATH = '/Volumes'
+
+// Garmin Express cache path (macOS)
+const GARMIN_EXPRESS_PATH = join(homedir(), 'Library/Application Support/Garmin/Express/RegisteredDevices')
 
 // Common Garmin device volume name patterns
 const GARMIN_VOLUME_PATTERNS = [
@@ -54,38 +58,107 @@ export class GarminDriver implements WatchDriver {
   readonly name = 'Garmin'
   readonly type = 'garmin' as const
 
+  /**
+   * Detect devices from both USB mass storage and Garmin Express cache
+   */
   async detectDevices(): Promise<GarminDevice[]> {
     const devices: GarminDevice[] = []
 
-    if (!existsSync(VOLUMES_PATH)) {
+    // First, try USB mass storage devices
+    if (existsSync(VOLUMES_PATH)) {
+      const volumes = readdirSync(VOLUMES_PATH)
+
+      for (const volume of volumes) {
+        const volumePath = join(VOLUMES_PATH, volume)
+
+        try {
+          if (!statSync(volumePath).isDirectory()) continue
+        } catch {
+          continue
+        }
+
+        // Check if volume matches Garmin patterns or has GARMIN folder
+        const upperVolume = volume.toUpperCase()
+        let isGarmin = GARMIN_VOLUME_PATTERNS.some(pattern => upperVolume.includes(pattern))
+
+        if (!isGarmin) {
+          const garminFolder = join(volumePath, 'GARMIN')
+          isGarmin = existsSync(garminFolder)
+        }
+
+        if (isGarmin) {
+          const device = await this.getDeviceInfo(volumePath, volume)
+          if (device) {
+            devices.push(device)
+          }
+        }
+      }
+    }
+
+    // Also check Garmin Express cache (for MTP-only devices)
+    const expressDevices = await this.detectGarminExpressDevices()
+    devices.push(...expressDevices)
+
+    return devices
+  }
+
+  /**
+   * Detect devices synced via Garmin Express (MTP mode)
+   */
+  async detectGarminExpressDevices(): Promise<GarminDevice[]> {
+    const devices: GarminDevice[] = []
+
+    if (!existsSync(GARMIN_EXPRESS_PATH)) {
       return devices
     }
 
-    const volumes = readdirSync(VOLUMES_PATH)
+    const deviceFolders = readdirSync(GARMIN_EXPRESS_PATH)
 
-    for (const volume of volumes) {
-      const volumePath = join(VOLUMES_PATH, volume)
+    for (const folder of deviceFolders) {
+      const devicePath = join(GARMIN_EXPRESS_PATH, folder)
 
       try {
-        if (!statSync(volumePath).isDirectory()) continue
+        if (!statSync(devicePath).isDirectory()) continue
       } catch {
         continue
       }
 
-      // Check if volume matches Garmin patterns or has GARMIN folder
-      const upperVolume = volume.toUpperCase()
-      let isGarmin = GARMIN_VOLUME_PATTERNS.some(pattern => upperVolume.includes(pattern))
+      // Read device info from GarminDevice.xml
+      const deviceXmlPath = join(devicePath, 'GarminDevice.xml')
+      if (!existsSync(deviceXmlPath)) continue
 
-      if (!isGarmin) {
-        const garminFolder = join(volumePath, 'GARMIN')
-        isGarmin = existsSync(garminFolder)
-      }
+      try {
+        const content = readFileSync(deviceXmlPath, 'utf8')
 
-      if (isGarmin) {
-        const device = await this.getDeviceInfo(volumePath, volume)
-        if (device) {
-          devices.push(device)
-        }
+        // Parse device info from XML
+        const descriptionMatch = content.match(/<Description>([^<]+)<\/Description>/i)
+        const idMatch = content.match(/<Id>([^<]+)<\/Id>/i)
+        const displayNameMatch = content.match(/<DisplayName>([^<]+)<\/DisplayName>/i)
+        const partNumberMatch = content.match(/<PartNumber>([^<]+)<\/PartNumber>/i)
+        const softwareVersionMatch = content.match(/<SoftwareVersion>([^<]+)<\/SoftwareVersion>/i)
+
+        const model = displayNameMatch?.[1] || descriptionMatch?.[1] || folder
+        const unitId = idMatch?.[1] || folder
+        const firmware = softwareVersionMatch?.[1]
+
+        // Check if this device has synced data
+        const syncPath = join(devicePath, 'PendingSyncUploads/Garmin')
+        if (!existsSync(syncPath)) continue
+
+        devices.push({
+          name: model,
+          path: devicePath,
+          type: 'garmin',
+          model,
+          serial: folder,
+          unitId,
+          firmware,
+          partNumber: partNumberMatch?.[1],
+          isGarminExpress: true,
+          garminExpressPath: syncPath,
+        } as GarminDevice)
+      } catch {
+        // Ignore parsing errors
       }
     }
 
@@ -152,6 +225,7 @@ export class GarminDriver implements WatchDriver {
   }
 
   async downloadData(device: WatchDevice, options: DownloadOptions = {}): Promise<DownloadResult> {
+    const garminDevice = device as GarminDevice
     const {
       outputDir = './garmin-data',
       includeActivities = true,
@@ -176,7 +250,12 @@ export class GarminDriver implements WatchDriver {
       mkdirSync(downloadPath, { recursive: true })
     }
 
-    // Download activities
+    // Handle Garmin Express cache devices
+    if (garminDevice.isGarminExpress && garminDevice.garminExpressPath) {
+      return this.downloadFromGarminExpress(garminDevice, options, result, downloadPath)
+    }
+
+    // Download activities from USB mass storage
     if (includeActivities) {
       const activityDir = join(device.path, GARMIN_DIRS.ACTIVITY)
       if (existsSync(activityDir)) {
@@ -287,6 +366,153 @@ export class GarminDriver implements WatchDriver {
           }
         }
       }
+    }
+
+    // Sort activities by start time
+    result.activities.sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+
+    return result
+  }
+
+  /**
+   * Download data from Garmin Express cache (for MTP-only devices)
+   */
+  private async downloadFromGarminExpress(
+    device: GarminDevice,
+    options: DownloadOptions,
+    result: DownloadResult,
+    downloadPath: string
+  ): Promise<DownloadResult> {
+    const {
+      includeActivities = true,
+      includeMonitoring = true,
+      since,
+      until,
+      copyRawFiles = true,
+    } = options
+
+    const basePath = device.garminExpressPath!
+
+    // Garmin Express cache directory structure
+    const EXPRESS_DIRS = {
+      Activity: join(basePath, 'Activity'),
+      Monitor: join(basePath, 'Monitor'),
+      Sleep: join(basePath, 'Sleep'),
+      HRVStatus: join(basePath, 'HRVStatus'),
+      SkinTemp: join(basePath, 'SkinTemp'),
+      Metrics: join(basePath, 'Metrics'),
+      Coach: join(basePath, 'Coach'),
+    }
+
+    // Helper to process FIT files in a directory
+    const processFitFiles = async (
+      dir: string,
+      handler: (filePath: string, monitoring: MonitoringData) => void,
+      destSubdir: string
+    ) => {
+      if (!existsSync(dir)) return
+
+      const files = readdirSync(dir).filter(f => f.toLowerCase().endsWith('.fit'))
+
+      for (const file of files) {
+        const filePath = join(dir, file)
+        try {
+          const stat = statSync(filePath)
+          const fileDate = stat.mtime
+
+          if (since && fileDate < since) continue
+          if (until && fileDate > until) continue
+
+          const monitoring = await this.parseMonitoringFile(filePath)
+          if (monitoring) {
+            handler(filePath, monitoring)
+          }
+
+          if (copyRawFiles) {
+            const destDir = join(downloadPath, destSubdir)
+            mkdirSync(destDir, { recursive: true })
+            const destPath = join(destDir, file)
+            copyFileSync(filePath, destPath)
+            result.rawFiles.push(destPath)
+          }
+        } catch (err) {
+          result.errors.push(err instanceof Error ? err : new Error(String(err)))
+        }
+      }
+    }
+
+    // Process activities
+    if (includeActivities && existsSync(EXPRESS_DIRS.Activity)) {
+      const files = readdirSync(EXPRESS_DIRS.Activity).filter(f =>
+        f.toLowerCase().endsWith('.fit')
+      )
+
+      for (const file of files) {
+        const filePath = join(EXPRESS_DIRS.Activity, file)
+        try {
+          const stat = statSync(filePath)
+          const fileDate = stat.mtime
+
+          if (since && fileDate < since) continue
+          if (until && fileDate > until) continue
+
+          const activity = await this.parseActivityFile(filePath)
+          if (activity) {
+            activity.rawFilePath = filePath
+            result.activities.push(activity)
+          }
+
+          if (copyRawFiles) {
+            const destDir = join(downloadPath, 'Activity')
+            mkdirSync(destDir, { recursive: true })
+            const destPath = join(destDir, file)
+            copyFileSync(filePath, destPath)
+            result.rawFiles.push(destPath)
+          }
+        } catch (err) {
+          result.errors.push(err instanceof Error ? err : new Error(String(err)))
+        }
+      }
+    }
+
+    // Process monitoring data
+    if (includeMonitoring) {
+      // Monitor files
+      await processFitFiles(EXPRESS_DIRS.Monitor, (filePath, monitoring) => {
+        const dateKey = new Date().toISOString().slice(0, 10)
+        const existing = result.monitoring.get(dateKey) || {}
+        result.monitoring.set(dateKey, { ...existing, ...monitoring })
+      }, 'Monitor')
+
+      // HRV Status files
+      await processFitFiles(EXPRESS_DIRS.HRVStatus, (filePath, monitoring) => {
+        if (monitoring.hrv && monitoring.hrv.length > 0) {
+          const dateKey = monitoring.hrv[0].timestamp.toISOString().slice(0, 10)
+          const existing = result.monitoring.get(dateKey) || {}
+          result.monitoring.set(dateKey, {
+            ...existing,
+            hrv: [...(existing.hrv || []), ...monitoring.hrv],
+          })
+        }
+      }, 'HRVStatus')
+
+      // Skin Temperature files
+      await processFitFiles(EXPRESS_DIRS.SkinTemp, (filePath, monitoring) => {
+        const stat = statSync(filePath)
+        const dateKey = stat.mtime.toISOString().slice(0, 10)
+        const existing = result.monitoring.get(dateKey) || {}
+        result.monitoring.set(dateKey, { ...existing, skinTemp: monitoring })
+      }, 'SkinTemp')
+
+      // Sleep files
+      await processFitFiles(EXPRESS_DIRS.Sleep, (filePath, monitoring) => {
+        if (monitoring.sleep) {
+          const dateKey = monitoring.sleep.date?.toISOString().slice(0, 10) ||
+            new Date().toISOString().slice(0, 10)
+          const existing = result.monitoring.get(dateKey) || {}
+          result.monitoring.set(dateKey, { ...existing, sleep: monitoring.sleep })
+        }
+      }, 'Sleep')
     }
 
     // Sort activities by start time
