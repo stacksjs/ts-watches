@@ -84,6 +84,7 @@
     "*.{js,ts}": "bunx --bun eslint . --fix"
   },
   "dependencies": {
-    "ts-garmin": "workspace:*"
+    "ts-garmin": "workspace:*",
+    "ts-trainingpeaks": "workspace:*"
   }
 }

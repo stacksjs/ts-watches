@@ -9,6 +9,7 @@ import type {
   TPCredentials,
   TPAthlete,
   TPCoachAthlete,
+  TPAthleteGroup,
   TPWorkout,
   TPMetrics,
   TPCalendarDay,
@@ -77,10 +78,19 @@ export class TrainingPeaks {
     const browser = new Browser({
       headless: this.headless,
       timeout: this.timeout,
+      incognito: true, // Use isolated profile to avoid session conflicts
     })
 
     try {
       await browser.launch()
+
+      // Clear any existing session data
+      console.log('Clearing browser storage...')
+      try {
+        await browser.clearAllStorage()
+      } catch {
+        // Ignore if storage clearing fails
+      }
 
       // Navigate to login page
       console.log('Navigating to login page...')
@@ -117,47 +127,30 @@ export class TrainingPeaks {
       if (currentUrl.includes('app.trainingpeaks.com') && !currentUrl.includes('login')) {
         console.log('Already logged in!')
       } else {
-        // Fill in credentials - try multiple selectors
+        // Fill in credentials using specific selectors
         console.log('Entering username...')
-        try {
-          await browser.type('input[name="Username"]', this.credentials.username)
-        } catch {
-          try {
-            await browser.type('#Username', this.credentials.username)
-          } catch {
-            await browser.type('input[type="text"]', this.credentials.username)
-          }
-        }
-        await new Promise(r => setTimeout(r, 500))
+        await browser.type('input[name="Username"]', this.credentials.username)
+        await new Promise(r => setTimeout(r, 300))
 
         console.log('Entering password...')
-        try {
-          await browser.type('input[name="Password"]', this.credentials.password)
-        } catch {
-          try {
-            await browser.type('#Password', this.credentials.password)
-          } catch {
-            await browser.type('input[type="password"]', this.credentials.password)
-          }
-        }
+        await browser.type('input[name="Password"]', this.credentials.password)
+        await new Promise(r => setTimeout(r, 500))
+
+        // Wait a moment for reCAPTCHA v3 to initialize (it runs invisibly)
+        console.log('Waiting for reCAPTCHA to initialize...')
+        await new Promise(r => setTimeout(r, 2000))
+
+        // Click login button using JavaScript click
+        console.log('Submitting login form...')
+        await browser.jsClick('button[type="submit"]')
+
+        // If that didn't work, try form submit
         await new Promise(r => setTimeout(r, 1000))
-
-        // Click login button - try multiple selectors and JS click
-        console.log('Clicking login button...')
-        console.log('NOTE: If reCAPTCHA appears, please complete it manually.')
-        console.log('NOTE: If the button does not click, please click it manually.')
-
-        await browser.evaluate(`
-          const btn = document.querySelector('button[type="submit"]') ||
-                      document.querySelector('input[type="submit"]') ||
-                      document.querySelector('form button') ||
-                      document.querySelector('.btn-primary') ||
-                      document.querySelector('#login-button');
-          if (btn) {
-            btn.focus();
-            btn.click();
-          }
-        `)
+        const urlAfterClick = await browser.evaluate<string>('window.location.href')
+        if (urlAfterClick.includes('login')) {
+          console.log('Button click may not have worked, trying form submit...')
+          await browser.submitForm('form')
+        }
 
         // Wait for redirect to app or dashboard
         console.log('Waiting for login to complete...')
@@ -209,8 +202,8 @@ export class TrainingPeaks {
    */
   private async verifySession(): Promise<boolean> {
     try {
-      const user = await this.getCurrentUser()
-      return !!user?.Id
+      const tokenResponse = await this.client.get<{ success: boolean, token?: { access_token: string } }>(`${TP_API_URL}/users/v3/token`)
+      return tokenResponse.success === true
     } catch {
       return false
     }
@@ -222,19 +215,14 @@ export class TrainingPeaks {
   async getCurrentUser(): Promise<TPAthlete> {
     if (this.currentUser) return this.currentUser
 
-    // First get the token/user info
-    const userInfo = await this.client.get<{ userId: number, athleteId?: number }>(`${TP_API_URL}/users/v3/token`)
+    // Get full user data - response is nested in "user" object
+    const response = await this.client.get<{ user: { userId: number, settings?: unknown } }>(`${TP_API_URL}/users/v3/user`)
 
-    // Then get full profile
-    this.currentUser = await this.client.get<TPAthlete>(`${TP_API_URL}/users/v3/user`)
-
-    // Ensure we have the athlete ID
-    if (!this.currentUser.Id && userInfo.athleteId) {
-      this.currentUser.Id = userInfo.athleteId
-    }
-    if (!this.currentUser.Id && userInfo.userId) {
-      this.currentUser.Id = userInfo.userId
-    }
+    // Map to our athlete type
+    this.currentUser = {
+      Id: response.user.userId,
+      UserId: response.user.userId,
+    } as TPAthlete
 
     return this.currentUser
   }
@@ -260,9 +248,65 @@ export class TrainingPeaks {
 
   /**
    * Get coached athletes (coach accounts only)
+   * Uses the coachedathletesadded endpoint discovered from network traffic
    */
   async getCoachedAthletes(): Promise<TPCoachAthlete[]> {
-    return this.client.get<TPCoachAthlete[]>(`${TP_API_URL}/coaches/v1/athletes`)
+    const user = await this.getCurrentUser()
+    return this.client.get<TPCoachAthlete[]>(`${TP_API_URL}/fitness/v1/coaches/${user.Id}/coachedathletesadded`)
+  }
+
+  /**
+   * Get athlete groups/tags for coach
+   */
+  async getAthleteGroups(): Promise<TPAthleteGroup[]> {
+    const user = await this.getCurrentUser()
+    return this.client.get<TPAthleteGroup[]>(`${TP_API_URL}/coaches/v2/coaches/${user.Id}/tags`)
+  }
+
+  /**
+   * Get all coached athlete IDs from groups
+   */
+  async getCoachedAthleteIds(): Promise<number[]> {
+    const groups = await this.getAthleteGroups()
+    const ids = new Set<number>()
+    for (const group of groups) {
+      for (const id of group.athleteIds) {
+        ids.add(id)
+      }
+    }
+    return Array.from(ids)
+  }
+
+  /**
+   * Get athlete group feed (athletes in a specific group)
+   */
+  async getAthleteGroupFeed(groupId: number): Promise<unknown[]> {
+    const user = await this.getCurrentUser()
+    return this.client.get<unknown[]>(`${TP_API_URL}/fitness/v1/coaches/${user.Id}/athletegroups/${groupId}/feed`)
+  }
+
+  /**
+   * Get assistant coaches
+   */
+  async getAssistantCoaches(): Promise<unknown[]> {
+    const user = await this.getCurrentUser()
+    return this.client.get<unknown[]>(`${TP_API_URL}/coaches/v1/coaches/${user.Id}/assistantcoaches`)
+  }
+
+  /**
+   * Get coach settings
+   */
+  async getCoachSettings(): Promise<unknown> {
+    const user = await this.getCurrentUser()
+    return this.client.get<unknown>(`${TP_API_URL}/coaches/v1/coaches/${user.Id}/settings`)
+  }
+
+  /**
+   * Get athletes upgrade status
+   */
+  async getAthletesUpgradeStatus(): Promise<unknown> {
+    const user = await this.getCurrentUser()
+    return this.client.get<unknown>(`${TP_API_URL}/coaches/v1/coaches/${user.Id}/athletes/upgradeStatus`)
   }
 
   /**
