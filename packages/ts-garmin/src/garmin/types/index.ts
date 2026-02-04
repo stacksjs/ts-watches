@@ -1,0 +1,380 @@
+export type GCUserProfileId = number
+export type GCUserHash = string
+export type GCWorkoutId = string
+export type GCGearId = string
+export type GCBadgeId = number
+export type GarminDomain = 'garmin.com' | 'garmin.cn'
+
+export enum ExportFileType {
+  tcx = 'tcx',
+  gpx = 'gpx',
+  kml = 'kml',
+  zip = 'zip',
+}
+
+export enum UploadFileType {
+  tcx = 'tcx',
+  gpx = 'gpx',
+  fit = 'fit',
+}
+
+export type ExportFileTypeValue = keyof typeof ExportFileType
+export type UploadFileTypeValue = keyof typeof UploadFileType
+
+export interface IUserInfo {
+  userProfileId: GCUserProfileId
+  username: string
+  emailAddress: string
+  locale: string
+  measurementSystemKey: string
+  timeFormatKey: string
+  dateFormatKey: string
+  numberFormatKey: string
+  heartRateDisplayFormatKey: string
+  powerDisplayFormatKey: string
+  timeZoneGroupKey: string
+  dayKey: unknown
+  isPublicByDefault: boolean
+  roles: string[]
+  displayName: GCUserHash
+  tocAcceptedDate: string
+  defaultActivityPrivacy: unknown
+  customerId: string
+  birthdate: unknown
+  socialNetwork: string
+  socialIcon: string
+  systemUser: boolean
+  systemMetricUser: boolean
+  underAge: boolean
+}
+
+export interface ISocialProfile {
+  id: number
+  profileId: GCUserProfileId
+  garminGUID: string
+  displayName: GCUserHash
+  fullName: string
+  userName: string
+  profileImageUuid: unknown
+  profileImageUrlLarge: string
+  profileImageUrlMedium: string
+  profileImageUrlSmall: string
+  location: string
+  facebookUrl: unknown
+  twitterUrl: unknown
+  personalWebsite: unknown
+  motivation: unknown
+  bio: unknown
+  primaryActivity: unknown
+  favoriteActivityTypes: unknown[]
+  runningTrainingSpeed: number
+  cyclingTrainingSpeed: number
+  favoriteCyclingActivityTypes: unknown[]
+  cyclingClassification: unknown
+  cyclingMaxAvgPower: number
+  swimmingTrainingSpeed: number
+  profileVisibility: string
+  activityStartVisibility: string
+  activityMapVisibility: string
+  courseVisibility: string
+  activityHeartRateVisibility: string
+  activityPowerVisibility: string
+  badgeVisibility: string
+  showAge: boolean
+  showWeight: boolean
+  showHeight: boolean
+  showWeightClass: boolean
+  showAgeRange: boolean
+  showGender: boolean
+  showActivityClass: boolean
+  showVO2Max: boolean
+  showPersonalRecords: boolean
+  showLast12Months: boolean
+  showLifetimeTotals: boolean
+  showUpcomingEvents: boolean
+  showRecentFavorites: boolean
+  showRecentDevice: boolean
+  showRecentGear: boolean
+  showBadges: boolean
+  otherActivity: null
+  otherPrimaryActivity: null
+  otherMotivation: null
+  userRoles: string[]
+  nameApproved: boolean
+  userProfileFullName: string
+  makeGolfScorecardsPrivate: boolean
+  allowGolfLiveScoring: boolean
+  allowGolfScoringByConnections: boolean
+  userLevel: number
+  userPoint: number
+  levelUpdateDate: string
+  levelIsViewed: boolean
+  levelPointThreshold: number
+  userPointOffset: number
+  userPro: boolean
+}
+
+export interface IOauth1Consumer {
+  key: string
+  secret: string
+}
+
+export interface IOauth1 {
+  token: IOauth1Token
+}
+
+export interface IGarminTokens {
+  oauth1: IOauth1Token
+  oauth2: IOauth2Token
+}
+
+export interface IOauth1Token {
+  oauth_token: string
+  oauth_token_secret: string
+}
+
+export interface IOauth2Token {
+  scope: string
+  jti: string
+  access_token: string
+  token_type: string
+  refresh_token: string
+  expires_in: number
+  refresh_token_expires_in: number
+  expires_at: number
+  refresh_token_expires_at: number
+  last_update_date: string
+  expires_date: string
+}
+
+export interface IUserSettings {
+  id: number
+  userData: IUserData
+  userSleep: {
+    sleepTime: number
+    defaultSleepTime: boolean
+    wakeTime: number
+    defaultWakeTime: boolean
+  }
+  connectDate: unknown
+  sourceType: unknown
+  userSleepWindows: IUserSleepWindows[]
+}
+
+export interface IUserData {
+  gender: unknown
+  weight: unknown
+  height: unknown
+  timeFormat: string
+  birthDate: unknown
+  measurementSystem: string
+  activityLevel: unknown
+  handedness: string
+  powerFormat: {
+    formatId: number
+    formatKey: string
+    minFraction: number
+    maxFraction: number
+    groupingUsed: boolean
+    displayFormat: unknown
+  }
+  heartRateFormat: {
+    formatId: number
+    formatKey: string
+    minFraction: number
+    maxFraction: number
+    groupingUsed: boolean
+    displayFormat: unknown
+  }
+  firstDayOfWeek: {
+    dayId: number
+    dayName: string
+    sortOrder: number
+    isPossibleFirstDay: boolean
+  }
+  vo2MaxRunning: unknown
+  vo2MaxCycling: unknown
+  lactateThresholdSpeed: unknown
+  lactateThresholdHeartRate: unknown
+  diveNumber: unknown
+  intensityMinutesCalcMethod: string
+  moderateIntensityMinutesHrZone: number
+  vigorousIntensityMinutesHrZone: number
+  hydrationMeasurementUnit: string
+  hydrationContainers: unknown[]
+  hydrationAutoGoalEnabled: boolean
+  firstbeatMaxStressScore: unknown
+  firstbeatCyclingLtTimestamp: unknown
+  firstbeatRunningLtTimestamp: unknown
+  thresholdHeartRateAutoDetected: unknown
+  ftpAutoDetected: unknown
+  trainingStatusPausedDate: unknown
+  weatherLocation: {
+    useFixedLocation: unknown
+    latitude: unknown
+    longitude: unknown
+    locationName: unknown
+    isoCountryCode: unknown
+    postalCode: unknown
+  }
+  golfDistanceUnit: string
+  golfElevationUnit: unknown
+  golfSpeedUnit: unknown
+  externalBottomTime: unknown
+}
+
+export interface IUserSleepWindows {
+  sleepWindowFrequency: string
+  startSleepTimeSecondsFromMidnight: number
+  endSleepTimeSecondsFromMidnight: number
+}
+
+export interface ICountActivities {
+  countOfActivities: number
+  date: string
+  stats: {
+    all: Record<string, unknown>
+  }
+}
+
+export interface IDailyStepsType {
+  calendarDate: string
+  stepGoal: number
+  totalDistance: number
+  totalSteps: number
+}
+
+export interface IWorkout {
+  workoutId?: number
+  ownerId?: number
+  workoutName: string
+  description?: string
+  updateDate: Date
+  createdDate: Date
+  sportType: ISportType
+  trainingPlanId: null
+  author: IAuthor
+  estimatedDurationInSecs: number
+  estimatedDistanceInMeters: null
+  estimateType: null
+  estimatedDistanceUnit: IUnit
+  poolLength: number
+  poolLengthUnit: IUnit
+  workoutProvider: string
+  workoutSourceId: string
+  consumer: null
+  atpPlanId: null
+  workoutNameI18nKey: null
+  descriptionI18nKey: null
+  shared: boolean
+  estimated: boolean
+}
+
+export interface IWorkoutDetail extends IWorkout {
+  workoutSegments: IWorkoutSegment[]
+  subSportType?: null
+  avgTrainingSpeed?: null
+  isWheelchair?: boolean
+}
+
+export interface IAuthor {
+  userProfilePk: null
+  displayName: null
+  fullName: null
+  profileImgNameLarge: null
+  profileImgNameMedium: null
+  profileImgNameSmall: null
+  userPro: boolean
+  vivokidUser: boolean
+}
+
+export interface IUnit {
+  unitId?: null
+  unitKey: string | null
+  factor?: null
+}
+
+export interface ISportType {
+  sportTypeId: number
+  sportTypeKey: string
+  displayOrder?: number
+}
+
+export interface IWorkoutSegment {
+  segmentOrder: number
+  sportType: ISportType
+  workoutSteps: IWorkoutStep[]
+}
+
+export interface IWorkoutStep {
+  type: string
+  stepId: number
+  stepOrder: number
+  stepType: IStepType
+  childStepId: null
+  description: null
+  endCondition: IEndCondition
+  endConditionValue: number | null
+  preferredEndConditionUnit: IUnit | null
+  endConditionCompare: null
+  targetType: ITargetType
+  targetValueOne: null
+  targetValueTwo: null
+  targetValueUnit: null
+  zoneNumber: null
+  secondaryTargetType: null
+  secondaryTargetValueOne: null
+  secondaryTargetValueTwo: null
+  secondaryTargetValueUnit: null
+  secondaryZoneNumber: null
+  endConditionZone: null
+  strokeType: IStrokeType
+  equipmentType: IEquipmentType
+  category: null
+  exerciseName: null
+  workoutProvider: null
+  providerExerciseSourceId: null
+  weightValue: null
+  weightUnit: null
+}
+
+export interface IEndCondition {
+  conditionTypeId: number
+  conditionTypeKey: string
+  displayOrder: number
+  displayable: boolean
+}
+
+export interface IEquipmentType {
+  equipmentTypeId: number
+  equipmentTypeKey: null
+  displayOrder: number
+}
+
+export interface IStepType {
+  stepTypeId: number
+  stepTypeKey: string
+  displayOrder: number
+}
+
+export interface IStrokeType {
+  strokeTypeId: number
+  strokeTypeKey: null
+  displayOrder: number
+}
+
+export interface ITargetType {
+  workoutTargetTypeId: number
+  workoutTargetTypeKey: string
+  displayOrder: number
+}
+
+export * from './activity'
+export * from './gear'
+export * from './gpx'
+export * from './sleep'
+export * from './workout'
+export * from './calendar'
+export * from './heartrate'
+export * from './hydration'
+export * from './weight'

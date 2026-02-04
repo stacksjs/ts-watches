@@ -1,0 +1,47 @@
+{
+  "name": "ts-garmin",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "TypeScript library for interfacing with Garmin Connect API",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-watches#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-watches.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stacksjs/ts-watches/issues"
+  },
+  "keywords": [
+    "garmin",
+    "garmin-connect",
+    "fitness",
+    "activities",
+    "workouts",
+    "health",
+    "typescript",
+    "bun"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "import": "./dist/*"
+    }
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun --bun build.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

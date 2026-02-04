@@ -2,6 +2,9 @@
   "name": "ts-watches",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "version": "0.1.0",
   "description": "A comprehensive TypeScript library for downloading, parsing, and analyzing data from smartwatches and fitness devices.",
   "author": "Chris Breuer <chris@stacksjs.org>",
