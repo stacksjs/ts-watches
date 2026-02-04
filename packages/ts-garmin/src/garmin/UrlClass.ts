@@ -195,4 +195,25 @@ export class UrlClass {
   CALENDAR_WEEK(year: number, month: number, day: number, firstDateOfWeek = 1): string {
     return `${this.GC_API}/calendar-service/year/${year}/month/${month}/day/${day}/start/${firstDateOfWeek}`
   }
+
+  // Wellness endpoints
+  DAILY_STRESS(date: string): string {
+    return `${this.GC_API}/wellness-service/wellness/dailyStress/${date}`
+  }
+
+  HRV_DATA(date: string): string {
+    return `${this.GC_API}/hrv-service/hrv/${date}`
+  }
+
+  TRAINING_READINESS(date: string): string {
+    return `${this.GC_API}/metrics-service/metrics/trainingreadiness/${date}`
+  }
+
+  BODY_BATTERY(date: string): string {
+    return `${this.GC_API}/wellness-service/wellness/bodyBattery?date=${date}`
+  }
+
+  DAILY_SUMMARY(userId: number, date: string): string {
+    return `${this.GC_API}/usersummary-service/usersummary/daily/${userId}?calendarDate=${date}`
+  }
 }

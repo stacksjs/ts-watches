@@ -36,6 +36,7 @@ import type { HeartRate } from './types/heartrate'
 import type { HydrationData, WaterIntake } from './types/hydration'
 import type { UpdateWeight, WeightData } from './types/weight'
 import type { IDailyStepsType } from './types'
+import type { StressData, HrvData, TrainingReadiness, BodyBatteryData, DailySummaryStats } from './types/wellness'
 
 export interface GCCredentials {
   username: string
@@ -432,6 +433,87 @@ export default class GarminConnect {
     }
     catch (error) {
       throw new Error(`Error in getHeartRate: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  async getStressData(date = new Date()): Promise<StressData> {
+    try {
+      const dateString = toDateString(date)
+      const stressData = await this.client.get<StressData>(this.url.DAILY_STRESS(dateString))
+
+      if (!stressData) {
+        throw new Error('Invalid or empty stress data response.')
+      }
+
+      return stressData
+    }
+    catch (error) {
+      throw new Error(`Error in getStressData: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  async getHrvData(date = new Date()): Promise<HrvData> {
+    try {
+      const dateString = toDateString(date)
+      const hrvData = await this.client.get<HrvData>(this.url.HRV_DATA(dateString))
+
+      if (!hrvData) {
+        throw new Error('Invalid or empty HRV data response.')
+      }
+
+      return hrvData
+    }
+    catch (error) {
+      throw new Error(`Error in getHrvData: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  async getTrainingReadiness(date = new Date()): Promise<TrainingReadiness> {
+    try {
+      const dateString = toDateString(date)
+      const trainingReadiness = await this.client.get<TrainingReadiness>(this.url.TRAINING_READINESS(dateString))
+
+      if (!trainingReadiness) {
+        throw new Error('Invalid or empty training readiness data response.')
+      }
+
+      return trainingReadiness
+    }
+    catch (error) {
+      throw new Error(`Error in getTrainingReadiness: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  async getBodyBattery(date = new Date()): Promise<BodyBatteryData> {
+    try {
+      const dateString = toDateString(date)
+      const bodyBattery = await this.client.get<BodyBatteryData>(this.url.BODY_BATTERY(dateString))
+
+      if (!bodyBattery) {
+        throw new Error('Invalid or empty body battery data response.')
+      }
+
+      return bodyBattery
+    }
+    catch (error) {
+      throw new Error(`Error in getBodyBattery: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  async getDailySummary(date = new Date()): Promise<DailySummaryStats> {
+    try {
+      const dateString = toDateString(date)
+      const profile = await this.getUserProfile()
+      const summary = await this.client.get<DailySummaryStats>(this.url.DAILY_SUMMARY(profile.profileId, dateString))
+
+      if (!summary) {
+        throw new Error('Invalid or empty daily summary response.')
+      }
+
+      return summary
+    }
+    catch (error) {
+      throw new Error(`Error in getDailySummary: ${error instanceof Error ? error.message : error}`)
     }
   }
 
