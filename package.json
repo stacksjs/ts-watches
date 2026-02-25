@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@stacksjs/bunpress": "link:@stacksjs/bunpress",
+    "@types/bun": "^1.3.9",
     "better-dx": "^0.2.3",
     "pickier": "^0.1.20"
   }
