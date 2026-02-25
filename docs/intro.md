@@ -4,7 +4,7 @@ ts-watches is a comprehensive TypeScript library for downloading, parsing, and a
 
 [[toc]]
 
-## Why ts-watches?
+## Why ts-watches
 
 Working with fitness device data is challenging:
 

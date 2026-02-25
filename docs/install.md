@@ -6,7 +6,7 @@ Get ts-watches set up in your project.
 
 ## Requirements
 
-- **Bun** v1.0+ or **Node.js** v18+
+- **Bun**v1.0+ or**Node.js** v18+
 - TypeScript 5.0+ (recommended)
 
 ## Package Manager
@@ -140,7 +140,7 @@ watch --version
 For ts-watches to detect your Garmin device:
 
 1. **Connect via USB** - Use the charging cable
-2. **Set USB Mode** - On watch: Settings > System > USB Mode > **Mass Storage**
+2. **Set USB Mode**- On watch: Settings > System > USB Mode >**Mass Storage**
 3. **Close Garmin Express** - It locks the device for MTP access
 4. **Verify mount** - Device appears as `/Volumes/GARMIN` (macOS) or `D:\GARMIN` (Windows)
 

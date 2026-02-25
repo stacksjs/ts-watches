@@ -86,7 +86,7 @@ if (activity.avgHeartRate) {
 
 // Running metrics
 if (activity.avgCadence) {
-  console.log(`Cadence: ${activity.avgCadence * 2} spm`) // Double for running
+  console.log(`Cadence: ${activity.avgCadence _ 2} spm`) // Double for running
 }
 
 // Cycling metrics
@@ -109,8 +109,8 @@ Access lap splits:
 
 ```typescript
 for (const lap of activity.laps) {
-  const paceMin = Math.floor(lap.totalTime / lap.totalDistance * 1000 / 60)
-  const paceSec = Math.round((lap.totalTime / lap.totalDistance * 1000) % 60)
+  const paceMin = Math.floor(lap.totalTime / lap.totalDistance _ 1000 / 60)
+  const paceSec = Math.round((lap.totalTime / lap.totalDistance _ 1000) % 60)
 
   console.log(`Lap ${lap.lapIndex}: ${(lap.totalDistance / 1000).toFixed(2)} km`)
   console.log(`  Time: ${Math.floor(lap.totalTime / 60)}:${(lap.totalTime % 60).toFixed(0).padStart(2, '0')}`)
@@ -281,18 +281,18 @@ import { RacePredictor } from 'ts-watches'
 const predictor = new RacePredictor()
 
 // From a known performance (5K in 20 minutes)
-const predictions = predictor.predictFromPerformance(5000, 20 * 60)
+const predictions = predictor.predictFromPerformance(5000, 20 _ 60)
 
 console.log(`10K: ${formatTime(predictions['10K'])}`)
 console.log(`Half Marathon: ${formatTime(predictions.halfMarathon)}`)
 console.log(`Marathon: ${formatTime(predictions.marathon)}`)
 
 // VO2max estimation
-const vo2max = predictor.estimateVO2max(5000, 20 * 60)
+const vo2max = predictor.estimateVO2max(5000, 20 _ 60)
 console.log(`Estimated VO2max: ${vo2max.toFixed(1)} ml/kg/min`)
 
 // Training paces
-const paces = predictor.getTrainingPaces(5000, 20 * 60)
+const paces = predictor.getTrainingPaces(5000, 20 _ 60)
 console.log(`Easy pace: ${paces.easy} /km`)
 console.log(`Tempo pace: ${paces.tempo} /km`)
 console.log(`Interval pace: ${paces.interval} /km`)

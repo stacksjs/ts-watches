@@ -70,5 +70,4 @@ ble.on('data', (device, data) => {
 })
 ```
 
-
 We try to keep the list up-to-date, but it's possible that some packages are missing. If you find any, please let us know!
