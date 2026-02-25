@@ -268,7 +268,8 @@ function findFastestSplit(records: ActivityRecord[], distanceMeters: number): nu
           const overshoot = splitDistance - distanceMeters
           const adjustedTime = time - (overshoot / segmentDistance) * segmentTime
           fastestTime = Math.min(fastestTime, adjustedTime)
-        } else {
+        }
+        else {
           fastestTime = Math.min(fastestTime, time)
         }
         break

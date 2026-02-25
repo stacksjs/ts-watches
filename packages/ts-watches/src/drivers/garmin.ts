@@ -73,7 +73,8 @@ export class GarminDriver implements WatchDriver {
 
         try {
           if (!statSync(volumePath).isDirectory()) continue
-        } catch {
+        }
+        catch {
           continue
         }
 
@@ -119,7 +120,8 @@ export class GarminDriver implements WatchDriver {
 
       try {
         if (!statSync(devicePath).isDirectory()) continue
-      } catch {
+      }
+      catch {
         continue
       }
 
@@ -157,7 +159,8 @@ export class GarminDriver implements WatchDriver {
           isGarminExpress: true,
           garminExpressPath: syncPath,
         } as GarminDevice)
-      } catch {
+      }
+      catch {
         // Ignore parsing errors
       }
     }
@@ -185,7 +188,8 @@ export class GarminDriver implements WatchDriver {
         const idMatch = content.match(/<Id>([^<]+)<\/Id>/i)
         if (modelMatch) model = modelMatch[1]
         if (idMatch) unitId = idMatch[1]
-      } catch {
+      }
+      catch {
         // Ignore XML parsing errors
       }
     }
@@ -208,7 +212,8 @@ export class GarminDriver implements WatchDriver {
           if (deviceInfo?.productName) {
             model = deviceInfo.productName
           }
-        } catch {
+        }
+        catch {
           // Ignore parsing errors
         }
       }
@@ -266,7 +271,7 @@ export class GarminDriver implements WatchDriver {
         for (const file of files) {
           const filePath = join(activityDir, file)
           try {
-            const stat = statSync(filePath)
+            const stat = statSync(_filePath)
             const fileDate = stat.mtime
 
             // Apply date filters
@@ -274,7 +279,7 @@ export class GarminDriver implements WatchDriver {
             if (until && fileDate > until) continue
 
             // Parse activity
-            const activity = await this.parseActivityFile(filePath)
+            const activity = await this.parseActivityFile(_filePath)
             if (activity) {
               activity.rawFilePath = filePath
               result.activities.push(activity)
@@ -285,10 +290,11 @@ export class GarminDriver implements WatchDriver {
               const destDir = join(downloadPath, 'Activity')
               mkdirSync(destDir, { recursive: true })
               const destPath = join(destDir, file)
-              copyFileSync(filePath, destPath)
+              copyFileSync(_filePath, destPath)
               result.rawFiles.push(destPath)
             }
-          } catch (err) {
+          }
+          catch (err) {
             result.errors.push(err instanceof Error ? err : new Error(String(err)))
           }
         }
@@ -306,7 +312,7 @@ export class GarminDriver implements WatchDriver {
         for (const file of files) {
           const filePath = join(monitorDir, file)
           try {
-            const stat = statSync(filePath)
+            const stat = statSync(_filePath)
             const fileDate = stat.mtime
 
             // Apply date filters
@@ -314,7 +320,7 @@ export class GarminDriver implements WatchDriver {
             if (until && fileDate > until) continue
 
             // Parse monitoring data
-            const monitoring = await this.parseMonitoringFile(filePath)
+            const monitoring = await this.parseMonitoringFile(_filePath)
             if (monitoring) {
               const dateKey = fileDate.toISOString().slice(0, 10)
 
@@ -328,10 +334,11 @@ export class GarminDriver implements WatchDriver {
               const destDir = join(downloadPath, 'Monitor')
               mkdirSync(destDir, { recursive: true })
               const destPath = join(destDir, file)
-              copyFileSync(filePath, destPath)
+              copyFileSync(_filePath, destPath)
               result.rawFiles.push(destPath)
             }
-          } catch (err) {
+          }
+          catch (err) {
             result.errors.push(err instanceof Error ? err : new Error(String(err)))
           }
         }
@@ -347,7 +354,7 @@ export class GarminDriver implements WatchDriver {
         for (const file of files) {
           const filePath = join(sleepDir, file)
           try {
-            const monitoring = await this.parseMonitoringFile(filePath)
+            const monitoring = await this.parseMonitoringFile(_filePath)
             if (monitoring?.sleep) {
               const dateKey = monitoring.sleep.date.toISOString().slice(0, 10)
               const existing = result.monitoring.get(dateKey) || {}
@@ -358,10 +365,11 @@ export class GarminDriver implements WatchDriver {
               const destDir = join(downloadPath, 'Sleep')
               mkdirSync(destDir, { recursive: true })
               const destPath = join(destDir, file)
-              copyFileSync(filePath, destPath)
+              copyFileSync(_filePath, destPath)
               result.rawFiles.push(destPath)
             }
-          } catch (err) {
+          }
+          catch (err) {
             result.errors.push(err instanceof Error ? err : new Error(String(err)))
           }
         }
@@ -407,7 +415,7 @@ export class GarminDriver implements WatchDriver {
     // Helper to process FIT files in a directory
     const processFitFiles = async (
       dir: string,
-      handler: (filePath: string, monitoring: MonitoringData) => void,
+      handler: (_filePath: string, monitoring: MonitoringData) => void,
       destSubdir: string
     ) => {
       if (!existsSync(dir)) return
@@ -417,25 +425,26 @@ export class GarminDriver implements WatchDriver {
       for (const file of files) {
         const filePath = join(dir, file)
         try {
-          const stat = statSync(filePath)
+          const stat = statSync(_filePath)
           const fileDate = stat.mtime
 
           if (since && fileDate < since) continue
           if (until && fileDate > until) continue
 
-          const monitoring = await this.parseMonitoringFile(filePath)
+          const monitoring = await this.parseMonitoringFile(_filePath)
           if (monitoring) {
-            handler(filePath, monitoring)
+            handler(_filePath, monitoring)
           }
 
           if (copyRawFiles) {
             const destDir = join(downloadPath, destSubdir)
             mkdirSync(destDir, { recursive: true })
             const destPath = join(destDir, file)
-            copyFileSync(filePath, destPath)
+            copyFileSync(_filePath, destPath)
             result.rawFiles.push(destPath)
           }
-        } catch (err) {
+        }
+        catch (err) {
           result.errors.push(err instanceof Error ? err : new Error(String(err)))
         }
       }
@@ -450,13 +459,13 @@ export class GarminDriver implements WatchDriver {
       for (const file of files) {
         const filePath = join(EXPRESS_DIRS.Activity, file)
         try {
-          const stat = statSync(filePath)
+          const stat = statSync(_filePath)
           const fileDate = stat.mtime
 
           if (since && fileDate < since) continue
           if (until && fileDate > until) continue
 
-          const activity = await this.parseActivityFile(filePath)
+          const activity = await this.parseActivityFile(_filePath)
           if (activity) {
             activity.rawFilePath = filePath
             result.activities.push(activity)
@@ -466,10 +475,11 @@ export class GarminDriver implements WatchDriver {
             const destDir = join(downloadPath, 'Activity')
             mkdirSync(destDir, { recursive: true })
             const destPath = join(destDir, file)
-            copyFileSync(filePath, destPath)
+            copyFileSync(_filePath, destPath)
             result.rawFiles.push(destPath)
           }
-        } catch (err) {
+        }
+        catch (err) {
           result.errors.push(err instanceof Error ? err : new Error(String(err)))
         }
       }
@@ -478,14 +488,14 @@ export class GarminDriver implements WatchDriver {
     // Process monitoring data
     if (includeMonitoring) {
       // Monitor files
-      await processFitFiles(EXPRESS_DIRS.Monitor, (filePath, monitoring) => {
+      await processFitFiles(EXPRESS_DIRS.Monitor, (_filePath, monitoring) => {
         const dateKey = new Date().toISOString().slice(0, 10)
         const existing = result.monitoring.get(dateKey) || {}
         result.monitoring.set(dateKey, { ...existing, ...monitoring })
       }, 'Monitor')
 
       // HRV Status files
-      await processFitFiles(EXPRESS_DIRS.HRVStatus, (filePath, monitoring) => {
+      await processFitFiles(EXPRESS_DIRS.HRVStatus, (_filePath, monitoring) => {
         if (monitoring.hrv && monitoring.hrv.length > 0) {
           const dateKey = monitoring.hrv[0].timestamp.toISOString().slice(0, 10)
           const existing = result.monitoring.get(dateKey) || {}
@@ -497,15 +507,15 @@ export class GarminDriver implements WatchDriver {
       }, 'HRVStatus')
 
       // Skin Temperature files
-      await processFitFiles(EXPRESS_DIRS.SkinTemp, (filePath, monitoring) => {
-        const stat = statSync(filePath)
+      await processFitFiles(EXPRESS_DIRS.SkinTemp, (_filePath, monitoring) => {
+        const stat = statSync(_filePath)
         const dateKey = stat.mtime.toISOString().slice(0, 10)
         const existing = result.monitoring.get(dateKey) || {}
         result.monitoring.set(dateKey, { ...existing, skinTemp: monitoring })
       }, 'SkinTemp')
 
       // Sleep files
-      await processFitFiles(EXPRESS_DIRS.Sleep, (filePath, monitoring) => {
+      await processFitFiles(EXPRESS_DIRS.Sleep, (_filePath, monitoring) => {
         if (monitoring.sleep) {
           const dateKey = monitoring.sleep.date?.toISOString().slice(0, 10) ||
             new Date().toISOString().slice(0, 10)
@@ -521,13 +531,13 @@ export class GarminDriver implements WatchDriver {
     return result
   }
 
-  async parseActivityFile(filePath: string): Promise<Activity | null> {
-    const ext = extname(filePath).toLowerCase()
+  async parseActivityFile(_filePath: string): Promise<Activity | null> {
+    const ext = extname(_filePath).toLowerCase()
     if (ext !== '.fit') {
       throw new Error(`Unsupported file format: ${ext}`)
     }
 
-    const data = readFileSync(filePath)
+    const data = readFileSync(_filePath)
     const parser = new FitParser(data)
     const result = parser.parse()
     const decoder = new FitDecoder(result)
@@ -535,13 +545,13 @@ export class GarminDriver implements WatchDriver {
     return decoder.decodeActivity()
   }
 
-  async parseMonitoringFile(filePath: string): Promise<MonitoringData> {
-    const ext = extname(filePath).toLowerCase()
+  async parseMonitoringFile(_filePath: string): Promise<MonitoringData> {
+    const ext = extname(_filePath).toLowerCase()
     if (ext !== '.fit') {
       throw new Error(`Unsupported file format: ${ext}`)
     }
 
-    const data = readFileSync(filePath)
+    const data = readFileSync(_filePath)
     const parser = new FitParser(data)
     const result = parser.parse()
     const decoder = new FitDecoder(result)

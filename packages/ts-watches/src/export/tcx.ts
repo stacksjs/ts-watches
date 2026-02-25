@@ -20,7 +20,7 @@ export function activityToTcx(activity: Activity, options: TcxOptions = {}): str
   const opts = { ...DEFAULT_OPTIONS, ...options }
 
   const laps = activity.laps.length > 0
-    ? activity.laps.map((lap, i) => lapToTcx(lap, getRecordsForLap(activity.records, lap), opts)).join('\n')
+    ? activity.laps.map((lap, _i) => lapToTcx(lap, getRecordsForLap(activity.records, lap), opts)).join('\n')
     : createSingleLap(activity, opts)
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -231,7 +231,9 @@ function escapeXml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+    // eslint-disable-next-line style/max-statements-per-line
     .replace(/'/g, '&apos;')
+
 }
 
 export async function writeTcx(activity: Activity, filePath: string, options?: TcxOptions): Promise<void> {

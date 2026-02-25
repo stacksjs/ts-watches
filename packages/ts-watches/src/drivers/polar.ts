@@ -33,7 +33,8 @@ function parseHrmFile(content: string): Activity | null {
     if (line.startsWith('[') && line.endsWith(']')) {
       currentSection = line.slice(1, -1)
       sections.set(currentSection, [])
-    } else if (currentSection && line) {
+    }
+    else if (currentSection && line) {
       sections.get(currentSection)?.push(line)
     }
   }
@@ -200,7 +201,8 @@ function parsePolarJson(content: string): Activity | null {
       records,
       source: 'garmin',
     }
-  } catch {
+  }
+  catch {
     return null
   }
 }
@@ -237,7 +239,8 @@ export class PolarDriver implements WatchDriver {
 
       try {
         if (!statSync(volumePath).isDirectory()) continue
-      } catch {
+      }
+      catch {
         continue
       }
 
@@ -294,7 +297,8 @@ export class PolarDriver implements WatchDriver {
           copyFileSync(file, destPath)
           result.rawFiles.push(destPath)
         }
-      } catch (err) {
+      }
+      catch (err) {
         result.errors.push(err instanceof Error ? err : new Error(String(err)))
       }
     }
@@ -315,7 +319,8 @@ export class PolarDriver implements WatchDriver {
           copyFileSync(file, destPath)
           result.rawFiles.push(destPath)
         }
-      } catch (err) {
+      }
+      catch (err) {
         result.errors.push(err instanceof Error ? err : new Error(String(err)))
       }
     }
@@ -357,14 +362,17 @@ export class PolarDriver implements WatchDriver {
           const stat = statSync(entryPath)
           if (stat.isDirectory()) {
             files.push(...this.findFiles(entryPath, ext))
-          } else if (entry.toLowerCase().endsWith(ext)) {
+          }
+          else if (entry.toLowerCase().endsWith(ext)) {
             files.push(entryPath)
           }
-        } catch {
+        }
+        catch {
           // Skip inaccessible files
         }
       }
-    } catch {
+    }
+    catch {
       // Skip inaccessible directories
     }
 

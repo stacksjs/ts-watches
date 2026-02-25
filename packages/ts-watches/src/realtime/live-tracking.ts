@@ -215,7 +215,8 @@ export class LiveTrackingManager {
     this.handlers.get(event)?.forEach(handler => {
       try {
         handler(...args)
-      } catch (err) {
+      }
+      catch (err) {
         this.config.onError(err instanceof Error ? err : new Error(String(err)))
       }
     })

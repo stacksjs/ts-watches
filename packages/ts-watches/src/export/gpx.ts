@@ -137,7 +137,9 @@ function escapeXml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+    // eslint-disable-next-line style/max-statements-per-line
     .replace(/'/g, '&apos;')
+
 }
 
 export async function writeGpx(activity: Activity, filePath: string, options?: GpxOptions): Promise<void> {

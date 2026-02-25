@@ -83,7 +83,8 @@ export class CourseBuilder {
       const elevChange = altitude - this.lastAltitude
       if (elevChange > 0) {
         this.totalAscent += elevChange
-      } else {
+      }
+      else {
         this.totalDescent += Math.abs(elevChange)
       }
     }
@@ -97,7 +98,11 @@ export class CourseBuilder {
   /**
    * Add multiple track points
    */
-  addPoints(points: Array<{ lat: number; lng: number; altitude?: number }>): this {
+  addPoints(points: Array<{
+    lat: number
+    lng: number
+    altitude?: number
+  }>): this {
     for (const point of points) {
       this.addPoint(point.lat, point.lng, point.altitude)
     }
@@ -197,7 +202,10 @@ export class CourseBuilder {
   /**
    * Import from GeoJSON LineString
    */
-  fromGeoJson(geoJson: { type: string; coordinates: number[][] }): this {
+  fromGeoJson(geoJson: {
+    type: string
+    coordinates: number[][]
+  }): this {
     if (geoJson.type !== 'LineString') {
       throw new Error('Expected GeoJSON LineString')
     }

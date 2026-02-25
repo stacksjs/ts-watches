@@ -47,7 +47,7 @@ export interface Listeners {
   [event: string]: EventCallback<unknown>[]
 }
 
-export type EventCallback<T> = (data: T) => void
+export type EventCallback<T> = (_data: T) => void
 
 export enum Event {
   sessionChange = 'sessionChange',
@@ -263,7 +263,7 @@ export default class GarminConnect {
     const dayStats = days.find(({ calendarDate }) => calendarDate === dateString)
 
     if (!dayStats) {
-      throw new Error("Can't find daily steps for this date.")
+      throw new Error('Can\'t find daily steps for this date.')
     }
 
     return dayStats.totalSteps
@@ -608,13 +608,13 @@ export default class GarminConnect {
     return response as T
   }
 
-  async post<T>(url: string, data: unknown): Promise<T> {
-    const response = await this.client.post<T>(url, data, {})
+  async post<T>(url: string, _data: unknown): Promise<T> {
+    const response = await this.client.post<T>(url, _data, {})
     return response as T
   }
 
-  async put<T>(url: string, data: unknown): Promise<T> {
-    const response = await this.client.put<T>(url, data, {})
+  async put<T>(url: string, _data: unknown): Promise<T> {
+    const response = await this.client.put<T>(url, _data, {})
     return response as T
   }
 }

@@ -47,8 +47,14 @@ export interface PowerData {
   cadence?: number // rpm
   accumulatedPower?: number // watts
   pedalPowerBalance?: number // percentage left
-  torqueEffectiveness?: { left: number; right: number }
-  pedalSmoothness?: { left: number; right: number }
+  torqueEffectiveness?: {
+    left: number
+    right: number
+  }
+  pedalSmoothness?: {
+    left: number
+    right: number
+  }
 }
 
 export interface RunningDynamicsData {
@@ -74,13 +80,28 @@ export interface FitnessEquipmentData {
 }
 
 export type AntPlusData =
-  | { type: 'heart_rate'; data: HeartRateData }
-  | { type: 'speed_cadence'; data: SpeedCadenceData }
-  | { type: 'power_meter'; data: PowerData }
-  | { type: 'running_dynamics'; data: RunningDynamicsData }
-  | { type: 'fitness_equipment'; data: FitnessEquipmentData }
+  | {
+    type: 'heart_rate'
+    data: HeartRateData
+  }
+  | {
+    type: 'speed_cadence'
+    data: SpeedCadenceData
+  }
+  | {
+    type: 'power_meter'
+    data: PowerData
+  }
+  | {
+    type: 'running_dynamics'
+    data: RunningDynamicsData
+  }
+  | {
+    type: 'fitness_equipment'
+    data: FitnessEquipmentData
+  }
 
-export type AntPlusEventHandler = (device: AntPlusDevice, data: AntPlusData) => void
+export type AntPlusEventHandler = (_device: AntPlusDevice, _data: AntPlusData) => void
 
 /**
  * ANT+ Channel configuration
@@ -181,8 +202,8 @@ export interface AntPlusScanner {
    * Register event handler for data updates
    */
   on(event: 'data', handler: AntPlusEventHandler): void
-  on(event: 'device_found', handler: (device: AntPlusDevice) => void): void
-  on(event: 'device_lost', handler: (device: AntPlusDevice) => void): void
+  on(event: 'device_found', handler: (_device: AntPlusDevice) => void): void
+  on(event: 'device_lost', handler: (_device: AntPlusDevice) => void): void
   on(event: 'error', handler: (error: Error) => void): void
 
   /**

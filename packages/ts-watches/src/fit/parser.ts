@@ -23,9 +23,11 @@ export class FitParser {
   constructor(data: Buffer | ArrayBuffer | Uint8Array) {
     if (data instanceof ArrayBuffer) {
       this.buffer = Buffer.from(data)
-    } else if (data instanceof Uint8Array) {
+    }
+    else if (data instanceof Uint8Array) {
       this.buffer = Buffer.from(data)
-    } else {
+    }
+    else {
       this.buffer = data
     }
   }
@@ -41,11 +43,13 @@ export class FitParser {
         if (message) {
           messages.push(message)
         }
-      } catch (err) {
+      }
+      catch (err) {
         if (err instanceof FitParseError) {
           // Skip corrupted record and try to continue
           this.offset++
-        } else {
+        }
+        else {
           throw err
         }
       }

@@ -103,11 +103,13 @@ export class ZoneCalculator {
         const reserve = maxHr - restingHr
         min = Math.round(restingHr + (zone.min / 100) * reserve)
         max = Math.round(restingHr + (zone.max / 100) * reserve)
-      } else if (method === 'lthr' && lthr) {
+      }
+      else if (method === 'lthr' && lthr) {
         // LTHR-based zones
         min = Math.round(lthr * (zone.min / 85))
         max = Math.round(lthr * (zone.max / 85))
-      } else {
+      }
+      else {
         // Simple percentage of max
         min = Math.round(maxHr * zone.min / 100)
         max = Math.round(maxHr * zone.max / 100)
@@ -277,11 +279,14 @@ export class ZoneCalculator {
 
     if (lowIntensity > 70 && highIntensity > 15 && z3 < 15) {
       intensityDistribution = 'polarized'
-    } else if (z1 >= z2 && z2 >= z3 && z3 >= z4 && z4 >= z5) {
+    }
+    else if (z1 >= z2 && z2 >= z3 && z3 >= z4 && z4 >= z5) {
       intensityDistribution = 'pyramidal'
-    } else if (z3 + z4 > 50) {
+    }
+    else if (z3 + z4 > 50) {
       intensityDistribution = 'threshold'
-    } else {
+    }
+    else {
       intensityDistribution = 'unknown'
     }
 

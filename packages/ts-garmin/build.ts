@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable ts/no-top-level-await */
 import { $ } from 'bun'
 
 await $`rm -rf dist`

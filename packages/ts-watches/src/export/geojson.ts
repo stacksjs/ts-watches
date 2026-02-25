@@ -206,14 +206,22 @@ function simplifyPath(records: ActivityRecord[], tolerance: number): ActivityRec
     y: r.position!.lat,
   }))
 
-  const simplified = douglasPeucker(points, tolerance)
+  const simplified = douglasPeucker(_points, tolerance)
   return simplified.map(p => p.record)
 }
 
 function douglasPeucker(
-  points: Array<{ record: ActivityRecord; x: number; y: number }>,
+  points: Array<{
+    record: ActivityRecord
+    x: number
+    y: number
+  }>,
   tolerance: number
-): Array<{ record: ActivityRecord; x: number; y: number }> {
+): Array<{
+  record: ActivityRecord
+  x: number
+  y: number
+}> {
   if (points.length <= 2) return points
 
   let maxDist = 0
@@ -240,9 +248,18 @@ function douglasPeucker(
 }
 
 function perpendicularDistance(
-  point: { x: number; y: number },
-  lineStart: { x: number; y: number },
-  lineEnd: { x: number; y: number }
+  point: {
+    x: number
+    y: number
+  },
+  lineStart: {
+    x: number
+    y: number
+  },
+  lineEnd: {
+    x: number
+    y: number
+  }
 ): number {
   const dx = lineEnd.x - lineStart.x
   const dy = lineEnd.y - lineStart.y

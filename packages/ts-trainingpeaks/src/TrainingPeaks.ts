@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * TrainingPeaks Client
  * Browser-based authentication with API access
@@ -23,7 +24,7 @@ import type {
 const TP_HOME_URL = 'https://home.trainingpeaks.com'
 const TP_APP_URL = 'https://app.trainingpeaks.com'
 const TP_API_URL = 'https://tpapi.trainingpeaks.com'
-const TP_PEAKSWARE_API = 'https://api.peakswaresb.com'
+const _TP_PEAKSWARE_API = 'https://api.peakswaresb.com'
 
 export interface TrainingPeaksConfig {
   username: string
@@ -70,7 +71,8 @@ export class TrainingPeaks {
           this.authenticated = true
           return this
         }
-      } catch {
+      }
+      catch {
         // Cookies invalid or expired, need to login
       }
     }
@@ -88,7 +90,8 @@ export class TrainingPeaks {
       console.log('Clearing browser storage...')
       try {
         await browser.clearAllStorage()
-      } catch {
+      }
+      catch {
         // Ignore if storage clearing fails
       }
 
@@ -114,11 +117,15 @@ export class TrainingPeaks {
           ];
           for (const sel of selectors) {
             const btn = document.querySelector(sel);
-            if (btn) { btn.click(); break; }
+            if (btn) {
+              btn.click()
+              break
+            }
           }
         `)
         await new Promise(r => setTimeout(r, 1000))
-      } catch {
+      }
+      catch {
         // No cookie banner, continue
       }
 
@@ -126,7 +133,8 @@ export class TrainingPeaks {
       const currentUrl = await browser.evaluate<string>('window.location.href')
       if (currentUrl.includes('app.trainingpeaks.com') && !currentUrl.includes('login')) {
         console.log('Already logged in!')
-      } else {
+      }
+      else {
         // Fill in credentials using specific selectors
         console.log('Entering username...')
         await browser.type('input[name="Username"]', this.credentials.username)
@@ -190,7 +198,8 @@ export class TrainingPeaks {
 
       console.log('Login successful!')
 
-    } finally {
+    }
+    finally {
       await browser.close()
     }
 
@@ -204,7 +213,8 @@ export class TrainingPeaks {
     try {
       const tokenResponse = await this.client.get<{ success: boolean, token?: { access_token: string } }>(`${TP_API_URL}/users/v3/token`)
       return tokenResponse.success === true
-    } catch {
+    }
+    catch {
       return false
     }
   }

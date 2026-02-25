@@ -196,7 +196,8 @@ export class WorkoutBuilder {
       for (const step of steps) {
         if (step.type === 'repeat') {
           processSteps((step as WorkoutRepeatGroup).steps, multiplier * (step as WorkoutRepeatGroup).repeatCount)
-        } else {
+        }
+        else {
           const workoutStep = step as WorkoutStep
           if (workoutStep.duration.type === 'time' && workoutStep.duration.value) {
             total += workoutStep.duration.value * multiplier
@@ -216,7 +217,8 @@ export class WorkoutBuilder {
       for (const step of steps) {
         if (step.type === 'repeat') {
           processSteps((step as WorkoutRepeatGroup).steps, multiplier * (step as WorkoutRepeatGroup).repeatCount)
-        } else {
+        }
+        else {
           const workoutStep = step as WorkoutStep
           if (workoutStep.duration.type === 'distance' && workoutStep.duration.value) {
             total += workoutStep.duration.value * multiplier

@@ -60,9 +60,11 @@ export class RacePredictor {
       let confidence: 'high' | 'medium' | 'low'
       if (ratio >= 0.5 && ratio <= 2) {
         confidence = 'high'
-      } else if (ratio >= 0.25 && ratio <= 4) {
+      }
+      else if (ratio >= 0.25 && ratio <= 4) {
         confidence = 'medium'
-      } else {
+      }
+      else {
         confidence = 'low'
       }
 
@@ -104,7 +106,10 @@ export class RacePredictor {
     const recent = sorted.slice(0, 10)
 
     // Calculate weighted predictions
-    const predictions: Map<number, { totalTime: number; totalWeight: number }> = new Map()
+    const predictions: Map<number, {
+      totalTime: number
+      totalWeight: number
+    }> = new Map()
 
     for (const activity of recent) {
       // Weight based on recency (exponential decay)
@@ -141,9 +146,11 @@ export class RacePredictor {
       let confidence: 'high' | 'medium' | 'low'
       if (data.totalWeight > 3) {
         confidence = 'high'
-      } else if (data.totalWeight > 1) {
+      }
+      else if (data.totalWeight > 1) {
         confidence = 'medium'
-      } else {
+      }
+      else {
         confidence = 'low'
       }
 
@@ -246,7 +253,10 @@ export class RacePredictor {
    * Calculate training paces based on VDOT
    */
   getTrainingPaces(vdot: number): {
-    easy: { min: number; max: number }
+    easy: {
+      min: number
+      max: number
+    }
     marathon: number
     threshold: number
     interval: number

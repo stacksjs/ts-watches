@@ -191,7 +191,10 @@ export interface DailyHeartRate {
   minHeartRate?: number
   maxHeartRate?: number
   avgHeartRate?: number
-  samples: Array<{ timestamp: Date; heartRate: number }>
+  samples: Array<{
+    timestamp: Date
+    heartRate: number
+  }>
 }
 
 export interface SleepStage {
@@ -224,7 +227,10 @@ export interface StressData {
   lowStressDuration: number // minutes
   mediumStressDuration: number // minutes
   highStressDuration: number // minutes
-  samples: Array<{ timestamp: Date; stressLevel: number }>
+  samples: Array<{
+    timestamp: Date
+    stressLevel: number
+  }>
 }
 
 export interface BodyBattery {
@@ -233,7 +239,10 @@ export interface BodyBattery {
   endLevel: number
   chargedValue: number
   drainedValue: number
-  samples: Array<{ timestamp: Date; level: number }>
+  samples: Array<{
+    timestamp: Date
+    level: number
+  }>
 }
 
 export interface DailySteps {
@@ -251,7 +260,10 @@ export interface SpO2Data {
   avgSpO2: number
   minSpO2: number
   maxSpO2: number
-  samples: Array<{ timestamp: Date; spO2: number }>
+  samples: Array<{
+    timestamp: Date
+    spO2: number
+  }>
 }
 
 export interface RespirationData {
@@ -259,7 +271,10 @@ export interface RespirationData {
   avgRespirationRate: number // breaths per minute
   minRespirationRate: number
   maxRespirationRate: number
-  samples: Array<{ timestamp: Date; respirationRate: number }>
+  samples: Array<{
+    timestamp: Date
+    respirationRate: number
+  }>
 }
 
 export interface HRVData {
@@ -268,7 +283,10 @@ export interface HRVData {
   lastNightAverage?: number
   status?: 'low' | 'unbalanced' | 'balanced' | 'high'
   baseline?: number
-  samples: Array<{ timestamp: Date; hrv: number }>
+  samples: Array<{
+    timestamp: Date
+    hrv: number
+  }>
 }
 
 // ============================================================================

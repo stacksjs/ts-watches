@@ -13,7 +13,7 @@ const USER_AGENT_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 const OAUTH_CONSUMER_URL = 'https://thegarth.s3.amazonaws.com/oauth_consumer.json'
 
 let isRefreshing = false
-let refreshSubscribers: ((token: string) => void)[] = []
+let refreshSubscribers: ((_token: string) => void)[] = []
 
 function encodeRFC3986(str: string): string {
   return encodeURIComponent(str).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
@@ -57,7 +57,7 @@ function buildOAuthHeader(consumer: IOauth1Consumer, url: string, method: string
     oauth_version: '1.0',
   }
 
-  if (token) {
+  if (_token) {
     oauthParams.oauth_token = token.key
   }
 
@@ -444,7 +444,7 @@ export class HttpClient {
 
     const baseUrl = `${this.url.OAUTH_URL}/exchange/user/2.0`
 
-    const authHeader = buildOAuthHeader(this.OAUTH_CONSUMER, baseUrl, 'POST', token)
+    const authHeader = buildOAuthHeader(this.OAUTH_CONSUMER, baseUrl, 'POST', _token)
 
     const response = await fetch(baseUrl, {
       method: 'POST',
@@ -459,7 +459,7 @@ export class HttpClient {
     this.oauth2Token = this.setOauth2TokenExpiresAt(responseData)
   }
 
-  setOauth2TokenExpiresAt(token: IOauth2Token): IOauth2Token {
+  setOauth2TokenExpiresAt(_token: IOauth2Token): IOauth2Token {
     const now = Date.now()
     const nowSeconds = Math.floor(now / 1000)
     token.last_update_date = new Date(now).toISOString()

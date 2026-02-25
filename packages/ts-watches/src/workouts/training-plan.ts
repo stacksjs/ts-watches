@@ -124,14 +124,17 @@ export function generateMarathonPlan(config: {
     if (weeksRemaining <= 2) {
       phase = 'taper'
       weeklyMileage = peakMileage * (weeksRemaining === 2 ? 0.6 : 0.4)
-    } else if (weeksRemaining <= 5) {
+    }
+    else if (weeksRemaining <= 5) {
       phase = 'peak'
       weeklyMileage = peakMileage
-    } else if (weeksRemaining <= 10) {
+    }
+    else if (weeksRemaining <= 10) {
       phase = 'build'
       const buildProgress = (10 - weeksRemaining) / 5
       weeklyMileage = currentWeeklyMileage + (peakMileage - currentWeeklyMileage) * buildProgress
-    } else {
+    }
+    else {
       phase = 'base'
       const baseProgress = (planWeeks - 10 - weeksRemaining) / (planWeeks - 10)
       weeklyMileage = currentWeeklyMileage * (1 + baseProgress * 0.2)
@@ -254,9 +257,11 @@ export function generate5kPlan(config: {
 
     if (weeksRemaining === 0) {
       phase = 'taper'
-    } else if (weeksRemaining <= 2) {
+    }
+    else if (weeksRemaining <= 2) {
       phase = 'peak'
-    } else {
+    }
+    else {
       phase = 'build'
     }
 
@@ -343,7 +348,7 @@ function getPhaseDescription(phase: TrainingPhase, week: number, totalWeeks: num
  */
 export function planToIcal(plan: TrainingPlan): string {
   const events: string[] = []
-  let currentDate = new Date(plan.startDate)
+  const currentDate = new Date(plan.startDate)
 
   for (const week of plan.weeks) {
     for (const scheduled of week.workouts) {
@@ -360,7 +365,7 @@ export function planToIcal(plan: TrainingPlan): string {
 DTSTART:${dateStr}
 DTEND:${endStr}
 SUMMARY:${scheduled.workout.name}
-DESCRIPTION:${scheduled.workout.description || ''}${scheduled.notes ? '\\n' + scheduled.notes : ''}
+DESCRIPTION:${scheduled.workout.description || ''}${scheduled.notes ? `\\n${scheduled.notes}` : ''}
 END:VEVENT`)
     }
 

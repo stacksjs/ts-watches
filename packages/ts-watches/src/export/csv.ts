@@ -248,7 +248,7 @@ function getDateFormatter(format: 'iso' | 'unix' | 'locale'): (date: Date) => st
   }
 }
 
-function escapeForCsv(str: string): string {
+function escapeForCsv(_str: string): string {
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }

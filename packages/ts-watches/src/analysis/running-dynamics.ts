@@ -47,7 +47,10 @@ export interface FormInsight {
   status: 'good' | 'warning' | 'needs_attention'
   message: string
   value: number
-  optimalRange: { min: number; max: number }
+  optimalRange: {
+    min: number
+    max: number
+  }
 }
 
 export interface ExtendedActivityRecord extends ActivityRecord {
@@ -182,7 +185,8 @@ export class RunningDynamicsAnalyzer {
       if (insight.status !== 'good') {
         if (metrics.groundContactTime.avg > range.max) {
           recommendations.push('Work on increasing cadence and strengthening glutes to reduce ground contact time')
-        } else {
+        }
+        else {
           recommendations.push('Your ground contact time is excellent - maintain current form')
         }
       }
@@ -358,7 +362,10 @@ export class RunningDynamicsAnalyzer {
   private createInsight(
     metric: string,
     value: number,
-    range: { min: number; max: number },
+    range: {
+      min: number
+      max: number
+    },
     unit: string,
     score: number
   ): FormInsight {
@@ -368,10 +375,12 @@ export class RunningDynamicsAnalyzer {
     if (score >= 90) {
       status = 'good'
       message = `${metric} is in optimal range`
-    } else if (score >= 70) {
+    }
+    else if (score >= 70) {
       status = 'warning'
       message = `${metric} is slightly outside optimal range`
-    } else {
+    }
+    else {
       status = 'needs_attention'
       message = `${metric} needs improvement`
     }

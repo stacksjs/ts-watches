@@ -34,7 +34,8 @@ export class WahooDriver implements WatchDriver {
 
       try {
         if (!statSync(volumePath).isDirectory()) continue
-      } catch {
+      }
+      catch {
         continue
       }
 
@@ -133,7 +134,8 @@ export class WahooDriver implements WatchDriver {
               copyFileSync(filePath, destPath)
               result.rawFiles.push(destPath)
             }
-          } catch (err) {
+          }
+          catch (err) {
             result.errors.push(err instanceof Error ? err : new Error(String(err)))
           }
         }

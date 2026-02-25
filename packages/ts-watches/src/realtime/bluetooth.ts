@@ -64,11 +64,26 @@ export interface BleFitnessMachineData {
 }
 
 export type BleData =
-  | { type: 'heart_rate'; data: BleHeartRateData }
-  | { type: 'cycling'; data: BleCyclingData }
-  | { type: 'power'; data: BlePowerData }
-  | { type: 'running'; data: BleRunningData }
-  | { type: 'fitness_machine'; data: BleFitnessMachineData }
+  | {
+    type: 'heart_rate'
+    data: BleHeartRateData
+  }
+  | {
+    type: 'cycling'
+    data: BleCyclingData
+  }
+  | {
+    type: 'power'
+    data: BlePowerData
+  }
+  | {
+    type: 'running'
+    data: BleRunningData
+  }
+  | {
+    type: 'fitness_machine'
+    data: BleFitnessMachineData
+  }
 
 // BLE GATT Service UUIDs
 export const BLE_SERVICES = {
@@ -97,7 +112,7 @@ export const BLE_CHARACTERISTICS = {
   BATTERY_LEVEL: '00002a19-0000-1000-8000-00805f9b34fb',
 } as const
 
-export type BleEventHandler = (device: BleDevice, data: BleData) => void
+export type BleEventHandler = (_device: BleDevice, _data: BleData) => void
 
 /**
  * BLE Scanner interface
@@ -137,10 +152,10 @@ export interface BleScanner {
    * Event handlers
    */
   on(event: 'data', handler: BleEventHandler): void
-  on(event: 'device_found', handler: (device: BleDevice) => void): void
-  on(event: 'device_lost', handler: (device: BleDevice) => void): void
-  on(event: 'connected', handler: (device: BleDevice) => void): void
-  on(event: 'disconnected', handler: (device: BleDevice) => void): void
+  on(event: 'device_found', handler: (_device: BleDevice) => void): void
+  on(event: 'device_lost', handler: (_device: BleDevice) => void): void
+  on(event: 'connected', handler: (_device: BleDevice) => void): void
+  on(event: 'disconnected', handler: (_device: BleDevice) => void): void
   on(event: 'error', handler: (error: Error) => void): void
 
   off(event: string, handler: (...args: any[]) => void): void
@@ -159,7 +174,7 @@ export interface BleScanner {
 /**
  * Parse heart rate measurement characteristic value
  */
-export function parseHeartRateMeasurement(data: DataView): BleHeartRateData {
+export function parseHeartRateMeasurement(_data: DataView): BleHeartRateData {
   const flags = data.getUint8(0)
   const is16Bit = (flags & 0x01) !== 0
   const hasContact = (flags & 0x02) !== 0
@@ -255,7 +270,7 @@ export function parseCscMeasurement(
 /**
  * Parse cycling power measurement
  */
-export function parsePowerMeasurement(data: DataView): BlePowerData {
+export function parsePowerMeasurement(_data: DataView): BlePowerData {
   const flags = data.getUint16(0, true)
   const instantPower = data.getInt16(2, true)
 
@@ -345,7 +360,7 @@ export class MockBleScanner implements BleScanner {
     if (!device) throw new Error('Device not found')
 
     device.connected = true
-    this.emit('connected', device)
+    this.emit('connected', _device)
 
     // Start simulating data
     if (device.type === 'heart_rate') {
@@ -356,7 +371,7 @@ export class MockBleScanner implements BleScanner {
           contactDetected: true,
           rrIntervals: [800 + Math.floor(Math.random() * 100)],
         }
-        this.emit('data', device, { type: 'heart_rate', data })
+        this.emit('data', _device, { type: 'heart_rate', data })
       }, 1000)
       this.intervals.push(interval)
     }
@@ -369,7 +384,7 @@ export class MockBleScanner implements BleScanner {
           cadence: 80 + Math.floor(Math.random() * 20),
           pedalPowerBalance: 48 + Math.random() * 4,
         }
-        this.emit('data', device, { type: 'power', data })
+        this.emit('data', _device, { type: 'power', data })
       }, 1000)
       this.intervals.push(interval)
     }
@@ -377,9 +392,9 @@ export class MockBleScanner implements BleScanner {
 
   async disconnect(deviceId: string): Promise<void> {
     const device = this.devices.find(d => d.id === deviceId)
-    if (device) {
+    if (_device) {
       device.connected = false
-      this.emit('disconnected', device)
+      this.emit('disconnected', _device)
     }
   }
 

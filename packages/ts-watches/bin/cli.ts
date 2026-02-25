@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { CLI } from '@stacksjs/clapp'
 import { version } from '../package.json'
 import { createGarminDriver } from '../src/drivers/garmin'
@@ -53,7 +54,8 @@ cli
       console.log(`    Type: ${device.type}`)
       if (device.isGarminExpress) {
         console.log(`    Source: Garmin Express cache`)
-      } else {
+      }
+      else {
         console.log(`    Path: ${device.path}`)
       }
       if (device.model) console.log(`    Model: ${device.model}`)
@@ -154,10 +156,12 @@ cli
           if (options.output) {
             await Bun.write(options.output, output)
             console.log(`Written to ${options.output}`)
-          } else {
+          }
+          else {
             console.log(output)
           }
-        } else {
+        }
+        else {
           console.log('Monitoring Data:')
           if (monitoring.heartRate) {
             console.log(`  Heart Rate: avg ${monitoring.heartRate.avgHeartRate} bpm`)
@@ -180,10 +184,12 @@ cli
         if (options.output) {
           await Bun.write(options.output, output)
           console.log(`Written to ${options.output}`)
-        } else {
+        }
+        else {
           console.log(output)
         }
-      } else {
+      }
+      else {
         // Summary format
         console.log('Activity Summary:')
         console.log(`  Sport: ${activity.sport}${activity.subSport ? ` (${activity.subSport})` : ''}`)
@@ -215,7 +221,8 @@ cli
         console.log(`\n  Laps: ${activity.laps.length}`)
         console.log(`  Data Points: ${activity.records.length}`)
       }
-    } catch (err) {
+    }
+    catch (err) {
       console.error(`Error parsing file: ${err instanceof Error ? err.message : err}`)
       process.exit(1)
     }
@@ -226,7 +233,10 @@ cli
   .command('watch', 'Watch for device connection and auto-download')
   .option('-o, --output <dir>', 'Output directory', { default: './watch-data' })
   .option('--interval <ms>', 'Check interval in milliseconds', { default: 2000 })
-  .action(async (options: { output: string; interval: number }) => {
+  .action(async (options: {
+    output: string
+    interval: number
+  }) => {
     const driver = createGarminDriver()
     let lastDevicePath: string | null = null
 
@@ -258,7 +268,8 @@ cli
         }
 
         console.log('\nContinuing to watch...')
-      } else if (devices.length === 0 && lastDevicePath !== null) {
+      }
+      else if (devices.length === 0 && lastDevicePath !== null) {
         console.log('Device disconnected')
         lastDevicePath = null
       }

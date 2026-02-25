@@ -93,7 +93,7 @@ export class FitDecoder {
     const sessionMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.SESSION)
     const lapMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.LAP)
     const recordMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.RECORD)
-    const activityMsg = this.messages.find(m => m.globalMsgNum === MESG_NUM.ACTIVITY)
+    const _activityMsg = this.messages.find(m => m.globalMsgNum === MESG_NUM.ACTIVITY)
 
     if (sessionMsgs.length === 0) {
       return null
@@ -204,7 +204,8 @@ export class FitDecoder {
       if (altitude != null) {
         altitude = (altitude / 5) - 500 // Scale and offset
       }
-    } else {
+    }
+    else {
       altitude = altitude / 5 - 500
     }
 
@@ -215,7 +216,8 @@ export class FitDecoder {
       if (speed != null) {
         speed = speed / 1000
       }
-    } else {
+    }
+    else {
       speed = speed / 1000
     }
 
@@ -250,7 +252,10 @@ export class FitDecoder {
     // Heart rate data
     const hrMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.MONITORING)
     if (hrMsgs.length > 0) {
-      const samples: Array<{ timestamp: Date; heartRate: number }> = []
+      const samples: Array<{
+        timestamp: Date
+        heartRate: number
+      }> = []
       let minHr = Infinity
       let maxHr = 0
       let totalHr = 0
@@ -298,7 +303,8 @@ export class FitDecoder {
             currentStage.endTime = timestamp
             stages.push(currentStage)
             currentStage = { stage, startTime: timestamp, endTime: timestamp }
-          } else if (!currentStage) {
+          }
+          else if (!currentStage) {
             currentStage = { stage, startTime: timestamp, endTime: timestamp }
           }
         }
@@ -320,10 +326,18 @@ export class FitDecoder {
         for (const stage of stages) {
           const duration = (stage.endTime.getTime() - stage.startTime.getTime()) / 60000
           switch (stage.stage) {
-            case 'deep': deepTime += duration; break
-            case 'light': lightTime += duration; break
-            case 'rem': remTime += duration; break
-            case 'awake': awakeTime += duration; break
+            case 'deep':
+              deepTime += duration
+              break
+            case 'light':
+              lightTime += duration
+              break
+            case 'rem':
+              remTime += duration
+              break
+            case 'awake':
+              awakeTime += duration
+              break
           }
         }
 
@@ -344,7 +358,10 @@ export class FitDecoder {
     // Stress data
     const stressMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.STRESS_LEVEL)
     if (stressMsgs.length > 0) {
-      const samples: Array<{ timestamp: Date; stressLevel: number }> = []
+      const samples: Array<{
+        timestamp: Date
+        stressLevel: number
+      }> = []
       let totalStress = 0
       let maxStress = 0
 
@@ -376,7 +393,10 @@ export class FitDecoder {
     // SpO2 data
     const spo2Msgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.SPO2_DATA)
     if (spo2Msgs.length > 0) {
-      const samples: Array<{ timestamp: Date; spO2: number }> = []
+      const samples: Array<{
+        timestamp: Date
+        spO2: number
+      }> = []
       let minSpO2 = 100
       let maxSpO2 = 0
       let totalSpO2 = 0
@@ -407,7 +427,10 @@ export class FitDecoder {
     // Respiration data
     const respMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.RESPIRATION_RATE)
     if (respMsgs.length > 0) {
-      const samples: Array<{ timestamp: Date; respirationRate: number }> = []
+      const samples: Array<{
+        timestamp: Date
+        respirationRate: number
+      }> = []
       let minRate = Infinity
       let maxRate = 0
       let totalRate = 0
@@ -440,7 +463,10 @@ export class FitDecoder {
     // HRV data
     const hrvMsgs = this.messages.filter(m => m.globalMsgNum === MESG_NUM.HRV)
     if (hrvMsgs.length > 0) {
-      const samples: Array<{ timestamp: Date; hrv: number }> = []
+      const samples: Array<{
+        timestamp: Date
+        hrv: number
+      }> = []
 
       for (const msg of hrvMsgs) {
         const time = msg.fields[FIELD_DEF.HRV.TIME] as number | number[]
@@ -455,7 +481,8 @@ export class FitDecoder {
               })
             }
           }
-        } else if (time != null && time !== 0xffff) {
+        }
+        else if (time != null && time !== 0xffff) {
           samples.push({
             timestamp: new Date(),
             hrv: time / 1024 * 1000,

@@ -45,7 +45,7 @@ export class Browser {
   private pendingMessages = new Map<number, { resolve: (value: unknown) => void, reject: (error: Error) => void }>()
   private options: Required<BrowserOptions>
   private debuggerUrl: string | null = null
-  private eventListeners = new Map<string, ((params: unknown) => void)[]>()
+  private eventListeners = new Map<string, ((_params: unknown) => void)[]>()
 
   private userDataDir: string | null = null
 
@@ -83,7 +83,8 @@ export class Browser {
       try {
         const result = Bun.spawnSync(['test', '-x', path])
         if (result.exitCode === 0) return path
-      } catch {
+      }
+      catch {
         continue
       }
     }
@@ -176,7 +177,8 @@ export class Browser {
     let targets: Array<{ type: string, webSocketDebuggerUrl: string }>
     try {
       targets = JSON.parse(responseText)
-    } catch {
+    }
+    catch {
       throw new Error(`Failed to parse browser targets: ${responseText.slice(0, 200)}`)
     }
 
@@ -188,11 +190,13 @@ export class Browser {
       let newPage: { webSocketDebuggerUrl: string }
       try {
         newPage = JSON.parse(newPageText)
-      } catch {
+      }
+      catch {
         throw new Error(`Failed to create new page: ${newPageText.slice(0, 200)}`)
       }
       this.debuggerUrl = newPage.webSocketDebuggerUrl
-    } else {
+    }
+    else {
       this.debuggerUrl = pageTarget.webSocketDebuggerUrl
     }
 
@@ -241,7 +245,8 @@ export class Browser {
               this.pendingMessages.delete(message.id)
               if (message.error) {
                 pending.reject(new Error(message.error.message))
-              } else {
+              }
+              else {
                 pending.resolve(message.result)
               }
             }
@@ -256,14 +261,15 @@ export class Browser {
               }
             }
           }
-        } catch {
+        }
+        catch {
           // Ignore parse errors
         }
       }
     })
   }
 
-  private async send(method: string, params: Record<string, unknown> = {}): Promise<unknown> {
+  private async send(method: string, _params: Record<string, unknown> = {}): Promise<unknown> {
     if (!this.ws) throw new Error('Not connected to browser')
 
     const id = ++this.messageId
@@ -289,7 +295,7 @@ export class Browser {
     })
   }
 
-  on(event: string, callback: (params: unknown) => void): void {
+  on(event: string, callback: (_params: unknown) => void): void {
     const listeners = this.eventListeners.get(event) || []
     listeners.push(callback)
     this.eventListeners.set(event, listeners)
@@ -336,7 +342,8 @@ export class Browser {
 
       if (typeof urlPattern === 'string') {
         if (currentUrl.includes(urlPattern)) return currentUrl
-      } else {
+      }
+      else {
         if (urlPattern.test(currentUrl)) return currentUrl
       }
 
@@ -493,7 +500,7 @@ export class Browser {
   async enableRequestLogging(urlFilter?: RegExp): Promise<string[]> {
     const requests: string[] = []
 
-    this.on('Network.requestWillBeSent', (params: unknown) => {
+    this.on('Network.requestWillBeSent', (_params: unknown) => {
       const p = params as { request: { url: string, method: string } }
       const url = p.request.url
       if (!urlFilter || urlFilter.test(url)) {
@@ -523,7 +530,8 @@ export class Browser {
     if (this.ws) {
       try {
         await this.send('Browser.close')
-      } catch {
+      }
+      catch {
         // Ignore
       }
       this.ws.close()
@@ -540,7 +548,8 @@ export class Browser {
       try {
         const proc = Bun.spawn(['rm', '-rf', this.userDataDir], { stdout: 'ignore', stderr: 'ignore' })
         await proc.exited
-      } catch {
+      }
+      catch {
         // Ignore cleanup errors
       }
       this.userDataDir = null

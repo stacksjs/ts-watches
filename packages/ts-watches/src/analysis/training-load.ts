@@ -230,7 +230,7 @@ export class TrainingLoadCalculator {
 
     // Calculate weekly TSS
     const weeklyTSS = loads.slice(-7).reduce((sum, d) => sum + d.tss, 0)
-    const prevWeeklyTSS = loads.slice(-14, -7).reduce((sum, d) => sum + d.tss, 0)
+    const _prevWeeklyTSS = loads.slice(-14, -7).reduce((sum, d) => sum + d.tss, 0)
 
     // Ramp rate (change in CTL per week)
     const rampRate = current.ctl - weekAgo.ctl
@@ -259,27 +259,36 @@ export class TrainingLoadCalculator {
   getTrainingRecommendation(metrics: TrainingLoadMetrics): {
     status: 'fresh' | 'optimal' | 'tired' | 'overtrained'
     recommendation: string
-    suggestedTSS: { min: number; max: number }
+    suggestedTSS: {
+      min: number
+      max: number
+    }
   } {
     const { tsb, rampRate, ctl } = metrics
 
     let status: 'fresh' | 'optimal' | 'tired' | 'overtrained'
     let recommendation: string
-    let suggestedTSS: { min: number; max: number }
+    let suggestedTSS: {
+      min: number
+      max: number
+    }
 
     if (tsb > 25) {
       status = 'fresh'
       recommendation = 'You are well rested. Good time for a race or hard workout.'
       suggestedTSS = { min: Math.round(ctl * 1.2), max: Math.round(ctl * 1.5) }
-    } else if (tsb >= -10 && tsb <= 25) {
+    }
+    else if (tsb >= -10 && tsb <= 25) {
       status = 'optimal'
       recommendation = 'You are in the optimal training zone. Maintain consistency.'
       suggestedTSS = { min: Math.round(ctl * 0.8), max: Math.round(ctl * 1.2) }
-    } else if (tsb >= -30) {
+    }
+    else if (tsb >= -30) {
       status = 'tired'
       recommendation = 'You are accumulating fatigue. Consider easier sessions or rest.'
       suggestedTSS = { min: Math.round(ctl * 0.4), max: Math.round(ctl * 0.7) }
-    } else {
+    }
+    else {
       status = 'overtrained'
       recommendation = 'High fatigue detected. Take a rest day or very easy session.'
       suggestedTSS = { min: 0, max: Math.round(ctl * 0.3) }

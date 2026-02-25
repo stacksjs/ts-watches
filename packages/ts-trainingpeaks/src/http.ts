@@ -176,7 +176,8 @@ export class HttpClient {
       if (typeof options.body === 'object') {
         headers['Content-Type'] = headers['Content-Type'] || 'application/json'
         body = JSON.stringify(options.body)
-      } else if (typeof options.body === 'string') {
+      }
+      else if (typeof options.body === 'string') {
         body = options.body
       }
     }
@@ -209,7 +210,8 @@ export class HttpClient {
       }
 
       return await response.text() as T
-    } catch (error) {
+    }
+    catch (error) {
       clearTimeout(timeoutId)
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error(`Request timeout: ${url}`)
@@ -255,7 +257,8 @@ export class HttpClient {
       }
 
       this.setCookies(cookies)
-    } catch {
+    }
+    catch {
       // File doesn't exist or is invalid, ignore
     }
   }

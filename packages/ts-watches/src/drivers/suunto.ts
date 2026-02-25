@@ -193,7 +193,8 @@ function parseSuuntoJson(content: string): Activity | null {
       records,
       source: 'garmin',
     }
-  } catch {
+  }
+  catch {
     return null
   }
 }
@@ -239,7 +240,8 @@ export class SuuntoDriver implements WatchDriver {
 
       try {
         if (!statSync(volumePath).isDirectory()) continue
-      } catch {
+      }
+      catch {
         continue
       }
 
@@ -296,7 +298,8 @@ export class SuuntoDriver implements WatchDriver {
           copyFileSync(file, destPath)
           result.rawFiles.push(destPath)
         }
-      } catch (err) {
+      }
+      catch (err) {
         result.errors.push(err instanceof Error ? err : new Error(String(err)))
       }
     }
@@ -317,7 +320,8 @@ export class SuuntoDriver implements WatchDriver {
           copyFileSync(file, destPath)
           result.rawFiles.push(destPath)
         }
-      } catch (err) {
+      }
+      catch (err) {
         result.errors.push(err instanceof Error ? err : new Error(String(err)))
       }
     }
@@ -358,14 +362,17 @@ export class SuuntoDriver implements WatchDriver {
           const stat = statSync(entryPath)
           if (stat.isDirectory()) {
             files.push(...this.findFiles(entryPath, ext))
-          } else if (entry.toLowerCase().endsWith(ext)) {
+          }
+          else if (entry.toLowerCase().endsWith(ext)) {
             files.push(entryPath)
           }
-        } catch {
+        }
+        catch {
           // Skip inaccessible files
         }
       }
-    } catch {
+    }
+    catch {
       // Skip inaccessible directories
     }
 

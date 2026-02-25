@@ -187,7 +187,10 @@ export class AppleDriver implements WatchDriver {
 
     // Process heart rate records
     const hrRecords = records.filter(r => r.type === 'HKQuantityTypeIdentifierHeartRate')
-    const hrByDate = new Map<string, Array<{ timestamp: Date; heartRate: number }>>()
+    const hrByDate = new Map<string, Array<{
+      timestamp: Date
+      heartRate: number
+    }>>()
 
     for (const hr of hrRecords) {
       const date = parseAppleDate(hr.startDate)
@@ -248,7 +251,8 @@ export class AppleDriver implements WatchDriver {
     let durationSec = parseFloat(workout.duration)
     if (workout.durationUnit === 'min') {
       durationSec *= 60
-    } else if (workout.durationUnit === 'hr') {
+    }
+    else if (workout.durationUnit === 'hr') {
       durationSec *= 3600
     }
 
@@ -256,7 +260,8 @@ export class AppleDriver implements WatchDriver {
     let distanceM = parseFloat(workout.totalDistance)
     if (workout.totalDistanceUnit === 'km') {
       distanceM *= 1000
-    } else if (workout.totalDistanceUnit === 'mi') {
+    }
+    else if (workout.totalDistanceUnit === 'mi') {
       distanceM *= 1609.34
     }
 

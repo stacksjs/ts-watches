@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-top-level-await */
 import { dts } from 'bun-plugin-dtsx'
 
 await Bun.build({
