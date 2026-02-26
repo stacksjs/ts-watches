@@ -1,16 +1,9 @@
-/* eslint-disable no-console */
-/* eslint-disable ts/no-top-level-await */
-import { $ } from 'bun'
+import { dts } from 'bun-plugin-dtsx'
 
-await $`rm -rf dist`
 await Bun.build({
   entrypoints: ['./src/index.ts'],
   outdir: './dist',
   target: 'node',
   format: 'esm',
+  plugins: [dts()],
 })
-
-// Generate type declarations
-await $`bunx tsc --emitDeclarationOnly --declaration --outDir dist`
-
-console.log('Build completed!')
