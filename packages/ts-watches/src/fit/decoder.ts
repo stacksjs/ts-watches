@@ -38,7 +38,7 @@ export class FitDecoder {
     const fileIdMsg = this.messages.find(m => m.globalMsgNum === MESG_NUM.FILE_ID)
     if (fileIdMsg) {
       const typeField = fileIdMsg.fields[FIELD_DEF.FILE_ID.TYPE]
-      this.fileType = this.getFileType(typeField as number)
+      this.fileType = this.resolveFileType(typeField as number)
     }
 
     const deviceInfoMsg = this.messages.find(m => m.globalMsgNum === MESG_NUM.DEVICE_INFO)
@@ -53,7 +53,7 @@ export class FitDecoder {
     }
   }
 
-  private getFileType(type: number): string {
+  private resolveFileType(type: number): string {
     const FILE_TYPES: Record<number, string> = {
       1: 'device',
       2: 'settings',
@@ -142,7 +142,7 @@ export class FitDecoder {
     }
 
     // Clean up undefined values
-    return this.cleanUndefined(activity) as Activity
+    return this.cleanUndefined(activity) as unknown as Activity
   }
 
   private decodeLap(lapMsg: FitMessage): ActivityLap {
@@ -187,7 +187,7 @@ export class FitDecoder {
       } : undefined,
     }
 
-    return this.cleanUndefined(lap) as ActivityLap
+    return this.cleanUndefined(lap) as unknown as ActivityLap
   }
 
   private decodeRecord(recordMsg: FitMessage): ActivityRecord {
@@ -243,7 +243,7 @@ export class FitDecoder {
       calories: f[FIELD_DEF.RECORD.CALORIES] as number,
     }
 
-    return this.cleanUndefined(record) as ActivityRecord
+    return this.cleanUndefined(record) as unknown as ActivityRecord
   }
 
   decodeMonitoring(): MonitoringData {
@@ -548,11 +548,11 @@ export class FitDecoder {
     return `garmin_${timestamp}`
   }
 
-  private cleanUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  private cleanUndefined<T extends object>(obj: T): Partial<T> {
     const result: Partial<T> = {}
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined && value !== null) {
-        result[key as keyof T] = value as T[keyof T]
+        (result as Record<string, unknown>)[key] = value
       }
     }
     return result

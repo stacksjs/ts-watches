@@ -57,7 +57,7 @@ function buildOAuthHeader(consumer: IOauth1Consumer, url: string, method: string
     oauth_version: '1.0',
   }
 
-  if (_token) {
+  if (token) {
     oauthParams.oauth_token = token.key
   }
 
@@ -444,7 +444,7 @@ export class HttpClient {
 
     const baseUrl = `${this.url.OAUTH_URL}/exchange/user/2.0`
 
-    const authHeader = buildOAuthHeader(this.OAUTH_CONSUMER, baseUrl, 'POST', _token)
+    const authHeader = buildOAuthHeader(this.OAUTH_CONSUMER, baseUrl, 'POST', token)
 
     const response = await fetch(baseUrl, {
       method: 'POST',
@@ -459,7 +459,7 @@ export class HttpClient {
     this.oauth2Token = this.setOauth2TokenExpiresAt(responseData)
   }
 
-  setOauth2TokenExpiresAt(_token: IOauth2Token): IOauth2Token {
+  setOauth2TokenExpiresAt(token: IOauth2Token): IOauth2Token {
     const now = Date.now()
     const nowSeconds = Math.floor(now / 1000)
     token.last_update_date = new Date(now).toISOString()

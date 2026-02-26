@@ -586,7 +586,7 @@ export const SLEEP_LEVEL = {
 } as const
 
 // FIT Epoch (Dec 31, 1989 00:00:00 UTC)
-export const FIT_EPOCH = Date.UTC(1989, 11, 31, 0, 0, 0)
+export const FIT_EPOCH: number = Date.UTC(1989, 11, 31, 0, 0, 0)
 
 // Manufacturer IDs
 export const MANUFACTURER = {

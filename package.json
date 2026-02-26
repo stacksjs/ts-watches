@@ -45,6 +45,7 @@
     "dev:docs": "bunx bunpress dev",
     "build:docs": "bunx bunpress build",
     "preview:docs": "bunx bunpress preview",
+    "build": "bun --filter '*' run build",
     "typecheck": "bun --bun tsc --noEmit"
   },
   "devDependencies": {

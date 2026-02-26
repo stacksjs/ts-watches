@@ -269,7 +269,7 @@ export class Browser {
     })
   }
 
-  private async send(method: string, _params: Record<string, unknown> = {}): Promise<unknown> {
+  private async send(method: string, params: Record<string, unknown> = {}): Promise<unknown> {
     if (!this.ws) throw new Error('Not connected to browser')
 
     const id = ++this.messageId
@@ -500,8 +500,8 @@ export class Browser {
   async enableRequestLogging(urlFilter?: RegExp): Promise<string[]> {
     const requests: string[] = []
 
-    this.on('Network.requestWillBeSent', (_params: unknown) => {
-      const p = params as { request: { url: string, method: string } }
+    this.on('Network.requestWillBeSent', (eventParams: unknown) => {
+      const p = eventParams as { request: { url: string, method: string } }
       const url = p.request.url
       if (!urlFilter || urlFilter.test(url)) {
         requests.push(`${p.request.method} ${url}`)

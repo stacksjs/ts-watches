@@ -122,7 +122,7 @@ function parseSmlFile(content: string): Activity | null {
 
   return {
     id: `suunto_${startTime.getTime()}`,
-    sport: mapSuuntoSport(activityType),
+    sport: mapSuuntoSport(activityType ?? undefined),
     startTime,
     endTime,
     totalElapsedTime: duration,

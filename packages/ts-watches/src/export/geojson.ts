@@ -206,10 +206,11 @@ function simplifyPath(records: ActivityRecord[], tolerance: number): ActivityRec
     y: r.position!.lat,
   }))
 
-  const simplified = douglasPeucker(_points, tolerance)
+  const simplified = douglasPeucker(points, tolerance)
   return simplified.map(p => p.record)
 }
 
+// eslint-disable-next-line pickier/no-unused-vars
 function douglasPeucker(
   points: Array<{
     record: ActivityRecord

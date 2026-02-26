@@ -280,7 +280,7 @@ export const workoutTemplates = {
   /**
    * Classic 5x1km intervals for running
    */
-  fiveByOneK: () => createWorkout('5x1K Intervals', 'running')
+  fiveByOneK: (): Workout => createWorkout('5x1K Intervals', 'running')
     .setDescription('Classic interval workout: 5x1km with recovery jogs')
     .warmup(duration.minutes(10), target.hrZone(2))
     .repeat(5, b => {
@@ -293,7 +293,7 @@ export const workoutTemplates = {
   /**
    * 30/30 intervals
    */
-  thirtyThirty: (sets: number = 10) => createWorkout('30/30 Intervals', 'running')
+  thirtyThirty: (sets: number = 10): Workout => createWorkout('30/30 Intervals', 'running')
     .setDescription(`${sets}x 30 seconds hard / 30 seconds easy`)
     .warmup(duration.minutes(10), target.hrZone(2))
     .repeat(sets, b => {
@@ -306,7 +306,7 @@ export const workoutTemplates = {
   /**
    * Tempo run
    */
-  tempoRun: (tempoMinutes: number = 20) => createWorkout('Tempo Run', 'running')
+  tempoRun: (tempoMinutes: number = 20): Workout => createWorkout('Tempo Run', 'running')
     .setDescription(`${tempoMinutes} minutes at tempo pace`)
     .warmup(duration.minutes(10), target.hrZone(2))
     .interval(duration.minutes(tempoMinutes), target.hrZone(3), 'Tempo')
@@ -316,7 +316,7 @@ export const workoutTemplates = {
   /**
    * Cycling sweet spot
    */
-  sweetSpot: (intervals: number = 3, minutes: number = 10) => createWorkout('Sweet Spot', 'cycling')
+  sweetSpot: (intervals: number = 3, minutes: number = 10): Workout => createWorkout('Sweet Spot', 'cycling')
     .setDescription(`${intervals}x${minutes}min at 88-93% FTP`)
     .warmup(duration.minutes(10), target.powerZone(2))
     .repeat(intervals, b => {
@@ -329,7 +329,7 @@ export const workoutTemplates = {
   /**
    * VO2max intervals for cycling
    */
-  vo2maxIntervals: () => createWorkout('VO2max Intervals', 'cycling')
+  vo2maxIntervals: (): Workout => createWorkout('VO2max Intervals', 'cycling')
     .setDescription('5x3min at 105-120% FTP')
     .warmup(duration.minutes(15), target.powerZone(2))
     .repeat(5, b => {

@@ -19,6 +19,10 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "ts-garmin": ["./packages/ts-garmin/src/index.ts"],
+      "ts-trainingpeaks": ["./packages/ts-trainingpeaks/src/index.ts"]
+    }
   }
 }

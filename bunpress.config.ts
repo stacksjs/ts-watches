@@ -1,4 +1,5 @@
-export default {
+// eslint-disable-next-line ts/explicit-function-return-type
+const config = {
   title: 'ts-watches',
   description: 'A comprehensive TypeScript library for downloading, parsing, and analyzing data from smartwatches and fitness devices',
 
@@ -76,4 +77,6 @@ export default {
     enabled: true,
     baseUrl: 'https://ts-watches.netlify.app',
   },
-}
+} as const
+
+export default config

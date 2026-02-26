@@ -17,7 +17,7 @@ export type WatchOptions = Partial<WatchConfig>
 export interface WatchDevice {
   name: string
   path: string
-  type: 'garmin' | 'apple' | 'samsung' | 'fitbit' | 'unknown'
+  type: 'garmin' | 'apple' | 'samsung' | 'fitbit' | 'wahoo' | 'coros' | 'polar' | 'suunto' | 'unknown'
   serial?: string
   model?: string
   firmware?: string
@@ -322,7 +322,7 @@ export interface WatchDriver {
 
   detectDevices(): Promise<WatchDevice[]>
   downloadData(device: WatchDevice, options?: DownloadOptions): Promise<DownloadResult>
-  parseActivityFile(filePath: string): Promise<Activity>
+  parseActivityFile(filePath: string): Promise<Activity | null>
   parseMonitoringFile(filePath: string): Promise<MonitoringData>
 }
 

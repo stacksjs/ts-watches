@@ -248,7 +248,8 @@ function getDateFormatter(format: 'iso' | 'unix' | 'locale'): (date: Date) => st
   }
 }
 
-function escapeForCsv(_str: string): string {
+// eslint-disable-next-line pickier/no-unused-vars
+export function escapeForCsv(str: string): string {
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }

@@ -174,7 +174,7 @@ export interface BleScanner {
 /**
  * Parse heart rate measurement characteristic value
  */
-export function parseHeartRateMeasurement(_data: DataView): BleHeartRateData {
+export function parseHeartRateMeasurement(data: DataView): BleHeartRateData {
   const flags = data.getUint8(0)
   const is16Bit = (flags & 0x01) !== 0
   const hasContact = (flags & 0x02) !== 0
@@ -270,7 +270,7 @@ export function parseCscMeasurement(
 /**
  * Parse cycling power measurement
  */
-export function parsePowerMeasurement(_data: DataView): BlePowerData {
+export function parsePowerMeasurement(data: DataView): BlePowerData {
   const flags = data.getUint16(0, true)
   const instantPower = data.getInt16(2, true)
 
@@ -360,18 +360,18 @@ export class MockBleScanner implements BleScanner {
     if (!device) throw new Error('Device not found')
 
     device.connected = true
-    this.emit('connected', _device)
+    this.emit('connected', device)
 
     // Start simulating data
     if (device.type === 'heart_rate') {
       const interval = setInterval(() => {
         if (!device.connected) return
-        const data: BleHeartRateData = {
+        const hrData: BleHeartRateData = {
           heartRate: 70 + Math.floor(Math.random() * 30),
           contactDetected: true,
           rrIntervals: [800 + Math.floor(Math.random() * 100)],
         }
-        this.emit('data', _device, { type: 'heart_rate', data })
+        this.emit('data', device, { type: 'heart_rate', data: hrData })
       }, 1000)
       this.intervals.push(interval)
     }
@@ -379,12 +379,12 @@ export class MockBleScanner implements BleScanner {
     if (device.type === 'cycling_power') {
       const interval = setInterval(() => {
         if (!device.connected) return
-        const data: BlePowerData = {
+        const powerData: BlePowerData = {
           instantPower: 150 + Math.floor(Math.random() * 100),
           cadence: 80 + Math.floor(Math.random() * 20),
           pedalPowerBalance: 48 + Math.random() * 4,
         }
-        this.emit('data', _device, { type: 'power', data })
+        this.emit('data', device, { type: 'power', data: powerData })
       }, 1000)
       this.intervals.push(interval)
     }
@@ -392,9 +392,9 @@ export class MockBleScanner implements BleScanner {
 
   async disconnect(deviceId: string): Promise<void> {
     const device = this.devices.find(d => d.id === deviceId)
-    if (_device) {
+    if (device) {
       device.connected = false
-      this.emit('disconnected', _device)
+      this.emit('disconnected', device)
     }
   }
 

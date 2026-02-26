@@ -62,10 +62,10 @@ export class StepType {
     }
   }
 
-  static WarmUp = new StepType('warmup', 1)
-  static Run = new StepType('interval', 3)
-  static Recovery = new StepType('recovery', 4)
-  static Rest = new StepType('rest', 5)
-  static Cooldown = new StepType('cooldown', 2)
-  static Other = new StepType('other', 7)
+  static WarmUp: StepType = new StepType('warmup', 1)
+  static Run: StepType = new StepType('interval', 3)
+  static Recovery: StepType = new StepType('recovery', 4)
+  static Rest: StepType = new StepType('rest', 5)
+  static Cooldown: StepType = new StepType('cooldown', 2)
+  static Other: StepType = new StepType('other', 7)
 }

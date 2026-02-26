@@ -255,7 +255,7 @@ export default class GarminConnect {
     )
   }
 
-  async getSteps(date = new Date()): Promise<number> {
+  async getSteps(date: Date = new Date()): Promise<number> {
     const dateString = toDateString(date)
     const days = await this.client.get<IDailyStepsType[]>(
       `${this.url.DAILY_STEPS}${dateString}/${dateString}`,
@@ -269,7 +269,7 @@ export default class GarminConnect {
     return dayStats.totalSteps
   }
 
-  async getSleepData(date = new Date()): Promise<SleepData> {
+  async getSleepData(date: Date = new Date()): Promise<SleepData> {
     try {
       const dateString = toDateString(date)
       const sleepData = await this.client.get<SleepData>(this.url.DAILY_SLEEP, {
@@ -287,7 +287,7 @@ export default class GarminConnect {
     }
   }
 
-  async getSleepDuration(date = new Date()): Promise<{ hours: number, minutes: number }> {
+  async getSleepDuration(date: Date = new Date()): Promise<{ hours: number, minutes: number }> {
     try {
       const sleepData = await this.getSleepData(date)
 
@@ -312,7 +312,7 @@ export default class GarminConnect {
     }
   }
 
-  async getDailyWeightData(date = new Date()): Promise<WeightData> {
+  async getDailyWeightData(date: Date = new Date()): Promise<WeightData> {
     try {
       const dateString = toDateString(date)
       const weightData = await this.client.get<WeightData>(`${this.url.DAILY_WEIGHT}/${dateString}`)
@@ -328,7 +328,7 @@ export default class GarminConnect {
     }
   }
 
-  async getDailyWeightInPounds(date = new Date()): Promise<number> {
+  async getDailyWeightInPounds(date: Date = new Date()): Promise<number> {
     const weightData = await this.getDailyWeightData(date)
 
     if (weightData.totalAverage && typeof weightData.totalAverage.weight === 'number') {
@@ -339,7 +339,7 @@ export default class GarminConnect {
     }
   }
 
-  async getDailyHydration(date = new Date()): Promise<number> {
+  async getDailyHydration(date: Date = new Date()): Promise<number> {
     try {
       const dateString = toDateString(date)
       const hydrationData = await this.client.get<HydrationData>(
@@ -357,7 +357,7 @@ export default class GarminConnect {
     }
   }
 
-  async updateWeight(date = new Date(), lbs: number, timezone: string): Promise<UpdateWeight> {
+  async updateWeight(date: Date | undefined = new Date(), lbs: number, timezone: string): Promise<UpdateWeight> {
     try {
       const weightData = await this.client.post<UpdateWeight>(this.url.UPDATE_WEIGHT, {
         dateTimestamp: getLocalTimestamp(date, timezone),
@@ -373,7 +373,7 @@ export default class GarminConnect {
     }
   }
 
-  async updateHydrationLogOunces(date = new Date(), valueInOz: number): Promise<WaterIntake> {
+  async updateHydrationLogOunces(date: Date | undefined = new Date(), valueInOz: number): Promise<WaterIntake> {
     try {
       const dateString = toDateString(date)
       const hydrationData = await this.client.put<WaterIntake>(this.url.HYDRATION_LOG, {
@@ -422,7 +422,7 @@ export default class GarminConnect {
     }
   }
 
-  async getHeartRate(date = new Date()): Promise<HeartRate> {
+  async getHeartRate(date: Date = new Date()): Promise<HeartRate> {
     try {
       const dateString = toDateString(date)
       const heartRate = await this.client.get<HeartRate>(this.url.DAILY_HEART_RATE, {
@@ -436,7 +436,7 @@ export default class GarminConnect {
     }
   }
 
-  async getStressData(date = new Date()): Promise<StressData> {
+  async getStressData(date: Date = new Date()): Promise<StressData> {
     try {
       const dateString = toDateString(date)
       const stressData = await this.client.get<StressData>(this.url.DAILY_STRESS(dateString))
@@ -452,7 +452,7 @@ export default class GarminConnect {
     }
   }
 
-  async getHrvData(date = new Date()): Promise<HrvData> {
+  async getHrvData(date: Date = new Date()): Promise<HrvData> {
     try {
       const dateString = toDateString(date)
       const hrvData = await this.client.get<HrvData>(this.url.HRV_DATA(dateString))
@@ -468,7 +468,7 @@ export default class GarminConnect {
     }
   }
 
-  async getTrainingReadiness(date = new Date()): Promise<TrainingReadiness> {
+  async getTrainingReadiness(date: Date = new Date()): Promise<TrainingReadiness> {
     try {
       const dateString = toDateString(date)
       const trainingReadiness = await this.client.get<TrainingReadiness>(this.url.TRAINING_READINESS(dateString))
@@ -484,7 +484,7 @@ export default class GarminConnect {
     }
   }
 
-  async getBodyBattery(date = new Date()): Promise<BodyBatteryData> {
+  async getBodyBattery(date: Date = new Date()): Promise<BodyBatteryData> {
     try {
       const dateString = toDateString(date)
       const bodyBattery = await this.client.get<BodyBatteryData>(this.url.BODY_BATTERY(dateString))
@@ -500,7 +500,7 @@ export default class GarminConnect {
     }
   }
 
-  async getDailySummary(date = new Date()): Promise<DailySummaryStats> {
+  async getDailySummary(date: Date = new Date()): Promise<DailySummaryStats> {
     try {
       const dateString = toDateString(date)
       const profile = await this.getUserProfile()

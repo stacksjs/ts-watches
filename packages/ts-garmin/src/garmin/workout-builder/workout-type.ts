@@ -14,9 +14,9 @@ export class WorkoutType {
     }
   }
 
-  static Running = new WorkoutType('running', 1)
-  static Cycling = new WorkoutType('cycling', 2)
-  static Swimming = new WorkoutType('swimming', 4)
-  static Strength = new WorkoutType('strength_training', 5)
-  static Cardio = new WorkoutType('cardio_training', 6)
+  static Running: WorkoutType = new WorkoutType('running', 1)
+  static Cycling: WorkoutType = new WorkoutType('cycling', 2)
+  static Swimming: WorkoutType = new WorkoutType('swimming', 4)
+  static Strength: WorkoutType = new WorkoutType('strength_training', 5)
+  static Cardio: WorkoutType = new WorkoutType('cardio_training', 6)
 }

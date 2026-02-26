@@ -4,6 +4,10 @@
     "types": [
       "bun"
     ],
+    "paths": {
+      "ts-garmin": ["../ts-garmin/src/index.ts"],
+      "ts-trainingpeaks": ["../ts-trainingpeaks/src/index.ts"]
+    },
     "noEmit": true,
     "isolatedDeclarations": true
   },

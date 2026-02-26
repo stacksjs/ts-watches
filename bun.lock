@@ -38,6 +38,7 @@
       "devDependencies": {
         "@stacksjs/clapp": "^0.2.0",
         "@types/bun": "latest",
+        "bun-plugin-dtsx": "^0.9.12",
         "bunfig": "^0.15.6",
       },
     },
