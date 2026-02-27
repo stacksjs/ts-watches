@@ -94,15 +94,17 @@ export class TrainingPlanBuilder {
   }
 }
 
+export interface MarathonPlanConfig {
+  raceDate: Date
+  name?: string
+  currentWeeklyMileage: number
+  fitness: 'beginner' | 'intermediate' | 'advanced'
+}
+
 /**
  * Generate a marathon training plan
  */
-export function generateMarathonPlan(config: {
-  raceDate: Date
-  name?: string
-  currentWeeklyMileage: number // km
-  fitness: 'beginner' | 'intermediate' | 'advanced'
-}): TrainingPlan {
+export function generateMarathonPlan(config: MarathonPlanConfig): TrainingPlan {
   const { raceDate, name = 'Marathon Training', currentWeeklyMileage, fitness } = config
 
   const weeksToRace = Math.ceil(
@@ -238,14 +240,16 @@ export function generateMarathonPlan(config: {
   }
 }
 
-/**
- * Generate a 5K training plan
- */
-export function generate5kPlan(config: {
+export interface FiveKPlanConfig {
   raceDate: Date
   name?: string
   fitness: 'beginner' | 'intermediate' | 'advanced'
-}): TrainingPlan {
+}
+
+/**
+ * Generate a 5K training plan
+ */
+export function generate5kPlan(config: FiveKPlanConfig): TrainingPlan {
   const { raceDate, name = '5K Training', fitness } = config
 
   const planWeeks = 8
