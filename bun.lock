@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "ts-watches",
@@ -8,6 +9,7 @@
         "@types/bun": "^1.3.9",
         "better-dx": "^0.2.3",
         "pickier": "^0.1.20",
+        "typescript": "^5.9.3",
       },
     },
     "packages/ts-garmin": {
