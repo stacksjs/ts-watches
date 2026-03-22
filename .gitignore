@@ -12,3 +12,5 @@ temp
 docs/.vitepress/cache
 packages/ts-watches/bin/watch
 .env
+.zed
+.cursor
