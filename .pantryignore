@@ -1,6 +1,12 @@
 # Large compiled binaries
 packages/ts-watches/bin/watch
 
+# Node modules at all levels
+**/node_modules
+
+# Git
+.git
+
 # Dev/build artifacts
 .cache
 .DS_Store
@@ -14,7 +20,6 @@ coverage
 lib-cov
 logs
 temp
-node_modules
 docs/.vitepress/cache
 
 # Test fixtures
