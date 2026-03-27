@@ -1,5 +1,5 @@
 import { GarminConnect } from 'ts-garmin'
-import type { Activity, SleepData, StressData, BodyBattery, HRVData } from '../types'
+import type { Activity, SleepData, StressData, BodyBattery, HRVData, WeightData } from '../types'
 
 export interface GarminConnectConfig {
   username: string
@@ -113,10 +113,13 @@ export class GarminConnectClient {
 
     const summary: DailySummary = { date }
 
-    const [heartRate, sleep, steps] = await Promise.allSettled([
+    const [heartRate, sleep, steps, stress, hrv, bodyBattery] = await Promise.allSettled([
       this.getHeartRateData(date),
       this.getSleepData(date),
       this.getStepsData(date),
+      this.getStressData(date),
+      this.getHrvData(date),
+      this.getBodyBatteryData(date),
     ])
 
     if (heartRate.status === 'fulfilled')
@@ -125,6 +128,12 @@ export class GarminConnectClient {
       summary.sleep = sleep.value
     if (steps.status === 'fulfilled')
       summary.steps = steps.value
+    if (stress.status === 'fulfilled')
+      summary.stress = stress.value
+    if (hrv.status === 'fulfilled')
+      summary.hrv = hrv.value
+    if (bodyBattery.status === 'fulfilled')
+      summary.bodyBattery = bodyBattery.value
 
     return summary
   }
@@ -213,25 +222,137 @@ export class GarminConnectClient {
     }
   }
 
-  async getStressData(_date: Date): Promise<StressData | undefined> {
+  async getStressData(date: Date): Promise<StressData | undefined> {
     this.ensureLoggedIn()
-    // Stress data endpoint not directly available in ts-garmin
-    // Would need to use the generic get() method
-    return undefined
+
+    try {
+      const data = await this.client.getStressData(date)
+      if (!data)
+        return undefined
+
+      const samples = (data.stressValuesArray || [])
+        .filter(([_, level]: [number, number]) => level >= 0)
+        .map(([ts, level]: [number, number]) => ({
+          timestamp: new Date(ts),
+          stressLevel: level,
+        }))
+
+      // Categorize stress durations from samples (values: 0-25 rest, 26-50 low, 51-75 med, 76-100 high)
+      let restMinutes = 0
+      let lowMinutes = 0
+      let mediumMinutes = 0
+      let highMinutes = 0
+      const intervalMinutes = samples.length > 1 ? 3 : 0 // Garmin samples every ~3 min
+
+      for (const s of samples) {
+        if (s.stressLevel <= 25) restMinutes += intervalMinutes
+        else if (s.stressLevel <= 50) lowMinutes += intervalMinutes
+        else if (s.stressLevel <= 75) mediumMinutes += intervalMinutes
+        else highMinutes += intervalMinutes
+      }
+
+      return {
+        date,
+        avgStressLevel: data.avgStressLevel ?? 0,
+        maxStressLevel: data.maxStressLevel ?? 0,
+        restStressDuration: restMinutes,
+        lowStressDuration: lowMinutes,
+        mediumStressDuration: mediumMinutes,
+        highStressDuration: highMinutes,
+        samples,
+      }
+    }
+    catch {
+      return undefined
+    }
   }
 
-  async getBodyBatteryData(_date: Date): Promise<BodyBattery | undefined> {
+  async getBodyBatteryData(date: Date): Promise<BodyBattery | undefined> {
     this.ensureLoggedIn()
-    // Body battery endpoint not directly available in ts-garmin
-    // Would need to use the generic get() method
-    return undefined
+
+    try {
+      const data = await this.client.getBodyBattery(date)
+      if (!data)
+        return undefined
+
+      const samples = (data.bodyBatteryValuesArray || [])
+        .filter(([_, level]: [number, number]) => level >= 0)
+        .map(([ts, level]: [number, number]) => ({
+          timestamp: new Date(ts),
+          level,
+        }))
+
+      const levels = samples.map(s => s.level)
+      const startLevel = levels[0] ?? 0
+      const endLevel = levels[levels.length - 1] ?? 0
+
+      return {
+        date,
+        startLevel,
+        endLevel,
+        chargedValue: data.charged ?? 0,
+        drainedValue: data.drained ?? 0,
+        samples,
+      }
+    }
+    catch {
+      return undefined
+    }
   }
 
-  async getHrvData(_date: Date): Promise<HRVData | undefined> {
+  async getHrvData(date: Date): Promise<HRVData | undefined> {
     this.ensureLoggedIn()
-    // HRV endpoint not directly available in ts-garmin
-    // Would need to use the generic get() method
-    return undefined
+
+    try {
+      const data = await this.client.getHrvData(date)
+      if (!data)
+        return undefined
+
+      const summary = data.hrvSummary
+      const samples = (data.hrvReadings || []).map((r: { hrvValue: number, readingTimeGMT: string }) => ({
+        timestamp: new Date(r.readingTimeGMT),
+        hrv: r.hrvValue,
+      }))
+
+      return {
+        date,
+        weeklyAverage: summary?.weeklyAvg,
+        lastNightAverage: summary?.lastNightAvg,
+        status: summary?.status ? summary.status.toLowerCase() as HRVData['status'] : undefined,
+        baseline: summary?.baseline?.markerValue,
+        samples,
+      }
+    }
+    catch {
+      return undefined
+    }
+  }
+
+  async getWeightData(date: Date): Promise<WeightData | undefined> {
+    this.ensureLoggedIn()
+
+    try {
+      const data = await this.client.getDailyWeightData(date)
+      if (!data?.dateWeightList?.length)
+        return undefined
+
+      const entry = data.dateWeightList[0]
+
+      return {
+        date,
+        weight: entry.weight,
+        bmi: entry.bmi,
+        bodyFatPercentage: entry.bodyFatPercentage,
+        bodyWater: entry.bodyWater,
+        boneMass: entry.boneMass,
+        muscleMass: entry.muscleMass,
+        visceralFat: entry.visceralFat,
+        metabolicAge: entry.metabolicAge,
+      }
+    }
+    catch {
+      return undefined
+    }
   }
 
   private mapSleepLevel(level: number): 'awake' | 'light' | 'deep' | 'rem' {

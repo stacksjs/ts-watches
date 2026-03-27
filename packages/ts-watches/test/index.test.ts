@@ -1,8 +1,9 @@
 import { describe, expect, it, beforeAll } from 'bun:test'
 import { FitParser, FitDecoder, fitTimestampToDate, semicirclesToDegrees } from '../src/fit'
 import { createGarminDriver } from '../src/drivers/garmin'
+import { GarminConnectClient } from '../src/cloud/garmin-connect'
 import { MESG_NUM, SPORT, SUB_SPORT, FIT_EPOCH } from '../src/fit/constants'
-import type { Activity, GarminDevice } from '../src/types'
+import type { Activity, GarminDevice, SleepData, StressData, HRVData, BodyBattery, WeightData, MonitoringData } from '../src/types'
 
 describe('FIT Parser', () => {
   describe('Utility functions', () => {
@@ -211,5 +212,206 @@ describe('FIT Decoder', () => {
     const decoder = new FitDecoder(monitoringResult)
     const activity = decoder.decodeActivity()
     expect(activity).toBeNull()
+  })
+})
+
+// ============================================================================
+// GarminConnectClient
+// ============================================================================
+
+describe('GarminConnectClient', () => {
+  it('should create client without config', () => {
+    const client = new GarminConnectClient()
+    expect(client).toBeDefined()
+  })
+
+  it('should create client with config', () => {
+    const client = new GarminConnectClient({
+      username: 'test@example.com',
+      password: 'test-password',
+    })
+    expect(client).toBeDefined()
+  })
+
+  it('should throw when calling methods without login', () => {
+    const client = new GarminConnectClient({
+      username: 'test@example.com',
+      password: 'test-password',
+    })
+    expect(() => client.getUserProfile()).toThrow('Not logged in')
+  })
+
+  it('should throw when calling getDailySummary without login', () => {
+    const client = new GarminConnectClient({
+      username: 'test@example.com',
+      password: 'test-password',
+    })
+    expect(() => client.getDailySummary(new Date())).toThrow('Not logged in')
+  })
+
+  it('should throw when calling getActivities without login', () => {
+    const client = new GarminConnectClient({
+      username: 'test@example.com',
+      password: 'test-password',
+    })
+    expect(() => client.getActivities()).toThrow('Not logged in')
+  })
+
+  it('should throw when calling health data methods without login', () => {
+    const client = new GarminConnectClient({
+      username: 'test@example.com',
+      password: 'test-password',
+    })
+    const date = new Date()
+    expect(() => client.getHeartRateData(date)).toThrow('Not logged in')
+    expect(() => client.getSleepData(date)).toThrow('Not logged in')
+    expect(() => client.getStressData(date)).toThrow('Not logged in')
+    expect(() => client.getHrvData(date)).toThrow('Not logged in')
+    expect(() => client.getBodyBatteryData(date)).toThrow('Not logged in')
+    expect(() => client.getWeightData(date)).toThrow('Not logged in')
+    expect(() => client.getStepsData(date)).toThrow('Not logged in')
+  })
+})
+
+// ============================================================================
+// Health & Monitoring Types
+// ============================================================================
+
+describe('Health & Monitoring Types', () => {
+  it('should have correct SleepData structure', () => {
+    const sleep: SleepData = {
+      date: new Date(),
+      startTime: new Date('2025-01-15T22:30:00Z'),
+      endTime: new Date('2025-01-16T06:30:00Z'),
+      totalSleepTime: 420,
+      deepSleepTime: 90,
+      lightSleepTime: 210,
+      remSleepTime: 100,
+      awakeTime: 20,
+      sleepScore: 85,
+      stages: [
+        { stage: 'light', startTime: new Date('2025-01-15T22:30:00Z'), endTime: new Date('2025-01-15T23:00:00Z') },
+        { stage: 'deep', startTime: new Date('2025-01-15T23:00:00Z'), endTime: new Date('2025-01-16T00:30:00Z') },
+        { stage: 'rem', startTime: new Date('2025-01-16T00:30:00Z'), endTime: new Date('2025-01-16T02:00:00Z') },
+      ],
+      avgHeartRate: 58,
+      avgRespirationRate: 15,
+    }
+
+    expect(sleep.totalSleepTime).toBe(420)
+    expect(sleep.stages).toHaveLength(3)
+    expect(sleep.stages[1].stage).toBe('deep')
+  })
+
+  it('should have correct StressData structure', () => {
+    const stress: StressData = {
+      date: new Date(),
+      avgStressLevel: 35,
+      maxStressLevel: 78,
+      restStressDuration: 120,
+      lowStressDuration: 240,
+      mediumStressDuration: 60,
+      highStressDuration: 15,
+      samples: [
+        { timestamp: new Date(), stressLevel: 25 },
+        { timestamp: new Date(), stressLevel: 45 },
+      ],
+    }
+
+    expect(stress.avgStressLevel).toBe(35)
+    expect(stress.samples).toHaveLength(2)
+  })
+
+  it('should have correct HRVData structure', () => {
+    const hrv: HRVData = {
+      date: new Date(),
+      weeklyAverage: 45,
+      lastNightAverage: 52,
+      status: 'balanced',
+      baseline: 48,
+      samples: [
+        { timestamp: new Date(), hrv: 50 },
+        { timestamp: new Date(), hrv: 55 },
+      ],
+    }
+
+    expect(hrv.status).toBe('balanced')
+    expect(hrv.weeklyAverage).toBe(45)
+  })
+
+  it('should have correct BodyBattery structure', () => {
+    const bb: BodyBattery = {
+      date: new Date(),
+      startLevel: 85,
+      endLevel: 25,
+      chargedValue: 15,
+      drainedValue: 75,
+      samples: [
+        { timestamp: new Date(), level: 85 },
+        { timestamp: new Date(), level: 50 },
+        { timestamp: new Date(), level: 25 },
+      ],
+    }
+
+    expect(bb.startLevel).toBe(85)
+    expect(bb.endLevel).toBe(25)
+    expect(bb.samples).toHaveLength(3)
+  })
+
+  it('should have correct WeightData structure', () => {
+    const weight: WeightData = {
+      date: new Date(),
+      weight: 75000,
+      bmi: 23.5,
+      bodyFatPercentage: 18.2,
+      muscleMass: 35000,
+      boneMass: 3200,
+      visceralFat: 8,
+    }
+
+    expect(weight.weight).toBe(75000)
+    expect(weight.bmi).toBe(23.5)
+    expect(weight.bodyFatPercentage).toBe(18.2)
+  })
+
+  it('should have correct MonitoringData aggregate structure', () => {
+    const monitoring: MonitoringData = {
+      heartRate: {
+        date: new Date(),
+        restingHeartRate: 55,
+        samples: [],
+      },
+      sleep: {
+        date: new Date(),
+        startTime: new Date(),
+        endTime: new Date(),
+        totalSleepTime: 420,
+        deepSleepTime: 90,
+        lightSleepTime: 210,
+        remSleepTime: 100,
+        awakeTime: 20,
+        stages: [],
+      },
+      stress: {
+        date: new Date(),
+        avgStressLevel: 30,
+        maxStressLevel: 65,
+        restStressDuration: 200,
+        lowStressDuration: 300,
+        mediumStressDuration: 50,
+        highStressDuration: 10,
+        samples: [],
+      },
+      hrv: {
+        date: new Date(),
+        weeklyAverage: 48,
+        samples: [],
+      },
+    }
+
+    expect(monitoring.heartRate?.restingHeartRate).toBe(55)
+    expect(monitoring.sleep?.totalSleepTime).toBe(420)
+    expect(monitoring.stress?.avgStressLevel).toBe(30)
+    expect(monitoring.hrv?.weeklyAverage).toBe(48)
   })
 })

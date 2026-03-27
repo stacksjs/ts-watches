@@ -289,6 +289,18 @@ export interface HRVData {
   }>
 }
 
+export interface WeightData {
+  date: Date
+  weight: number // grams
+  bmi?: number
+  bodyFatPercentage?: number
+  bodyWater?: number
+  boneMass?: number // grams
+  muscleMass?: number // grams
+  visceralFat?: number
+  metabolicAge?: number
+}
+
 // ============================================================================
 // Aggregate Types
 // ============================================================================

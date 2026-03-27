@@ -41,6 +41,7 @@ export type {
   DailyHeartRate,
   BodyBattery,
   DailySteps,
+  WeightData,
   GeoPosition,
   SportType,
   SubSportType,
