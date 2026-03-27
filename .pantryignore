@@ -1,0 +1,27 @@
+# Large compiled binaries
+packages/ts-watches/bin/watch
+
+# Dev/build artifacts
+.cache
+.DS_Store
+.idea
+.zed
+.cursor
+.env
+*.log
+*.tgz
+coverage
+lib-cov
+logs
+temp
+node_modules
+docs/.vitepress/cache
+
+# Test fixtures
+packages/ts-watches/test
+packages/ts-garmin/test
+packages/ts-trainingpeaks/test
+
+# Docs and scripts not needed for package
+docs
+scripts
