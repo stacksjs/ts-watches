@@ -101,6 +101,9 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Remove compiled binaries
+        run: rm -f packages/ts-watches/bin/watch packages/ts-watches/bin/watch-*
+
       - name: Publish Commit
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: pantry publish:commit '.'

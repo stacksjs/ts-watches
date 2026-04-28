@@ -1,5 +1,7 @@
 # Large compiled binaries
 packages/ts-watches/bin/watch
+**/bin/watch
+**/bin/watch-*
 
 # Node modules at all levels
 **/node_modules
