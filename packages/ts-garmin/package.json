@@ -43,6 +43,6 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "bun-plugin-dtsx": "^0.9.12"
+    "bun-plugin-dtsx": "^0.9.14"
   }
 }
