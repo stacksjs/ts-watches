@@ -107,6 +107,9 @@ jobs:
           cd ../../packages/ts-trainingpeaks && bun --bun build.ts 2>/dev/null || true
           cd ../../packages/ts-watches && bun --bun build.ts
 
+      - name: Clean up before publish
+        run: rm -rf node_modules packages/*/node_modules packages/ts-watches/bin/watch
+
       - name: Publish Commit
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: pantry publish:commit '.'
