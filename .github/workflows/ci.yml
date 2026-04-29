@@ -103,9 +103,9 @@ jobs:
 
       - name: Build
         run: |
-          cd packages/ts-watches && bun --bun build.ts
-          cd ../../packages/ts-garmin && bun --bun build.ts 2>/dev/null || true
+          cd packages/ts-garmin && bun --bun build.ts
           cd ../../packages/ts-trainingpeaks && bun --bun build.ts 2>/dev/null || true
+          cd ../../packages/ts-watches && bun --bun build.ts
 
       - name: Publish Commit
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
