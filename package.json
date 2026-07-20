@@ -55,7 +55,7 @@
     "@types/bun": "^1.3.13",
     "better-dx": "^0.2.15",
     "pickier": "^0.1.21",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   },
   "git-hooks": {
     "pre-commit": {
