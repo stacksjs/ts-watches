@@ -27,4 +27,4 @@ Interested in contributing? We'd love to have you! Here are some ways to get inv
 - **Improve docs** - Documentation improvements are always welcome
 - **Help others** - Answer questions on Discord or GitHub
 
-[Join the Stacks Discord](https://discord.gg/stacksjs) to chat with the team and other users.
+[Join the Stacks Discord](https://stacksjs.com/discord) to chat with the team and other users.
