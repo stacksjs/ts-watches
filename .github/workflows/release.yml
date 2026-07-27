@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  # Requested up front so npm trusted publishing works the moment OIDC is
+  # configured, without another workflow change.
+  id-token: write
+
 jobs:
   npm:
     name: npm
@@ -13,44 +19,59 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # Changelog generation walks from the previous tag, so it needs real
+          # history rather than a shallow clone.
           fetch-depth: 0
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
-        # env:
-        #   BUN_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         with:
           bun-version: latest
-
-      - name: Use cached node_modules
-        uses: actions/cache@v5
-        with:
-          path: node_modules
-          key: node-modules-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            node-modules-
 
       - name: Install Dependencies
         run: bun install
 
-      - name: Publish to npm
-        run: ./scripts/publish.sh
-        env:
-          BUN_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      # Without this every package publishes as a bare package.json: each one
+      # declares `files: ["dist"]`, and dist only exists once this has run.
+      - name: Build
+        run: bun run build
 
-      - name: Create GitHub release
-        run: bunx changelogithub
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Attach Binaries
-        uses: stacksjs/action-releaser@v1.2.9
+      - name: Publish ts-watches
+        uses: pantry-pm/pantry/packages/action@v0.10.51
         with:
-          files: |
-            packages/ts-starter-monorepo/bin/ts-starter-monorepo-linux-x64.zip
-            packages/ts-starter-monorepo/bin/ts-starter-monorepo-linux-arm64.zip
-            packages/ts-starter-monorepo/bin/ts-starter-monorepo-windows-x64.zip
-            packages/ts-starter-monorepo/bin/ts-starter-monorepo-darwin-x64.zip
-            packages/ts-starter-monorepo/bin/ts-starter-monorepo-darwin-arm64.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          install: 'false'
+          publish: npm
+          package-dir: packages/ts-watches
+          token: ${{ secrets.PANTRY_TOKEN }}
+
+      - name: Publish ts-garmin
+        uses: pantry-pm/pantry/packages/action@v0.10.51
+        with:
+          install: 'false'
+          publish: npm
+          package-dir: packages/ts-garmin
+          token: ${{ secrets.PANTRY_TOKEN }}
+
+      - name: Publish ts-trainingpeaks
+        uses: pantry-pm/pantry/packages/action@v0.10.51
+        with:
+          install: 'false'
+          publish: npm
+          package-dir: packages/ts-trainingpeaks
+          token: ${{ secrets.PANTRY_TOKEN }}
+
+      # Notes come from git history between the previous tag and this one, so a
+      # release never depends on someone remembering to edit CHANGELOG.md.
+      #
+      # Notes-only: the build produces a single binary for the runner's own
+      # platform, and attaching that as though it were "the" download is worse
+      # than attaching nothing. Cross-compiled artifacts can be added here when
+      # the build produces them.
+      - name: GitHub release
+        uses: pantry-pm/pantry/packages/action@v0.10.51
+        with:
+          install: 'false'
+          release: 'true'
+          release-files: none
+          release-changelog: auto
+          release-token: ${{ secrets.GITHUB_TOKEN }}
