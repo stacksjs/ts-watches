@@ -37,7 +37,8 @@ A comprehensive TypeScript library for downloading, parsing, and analyzing data 
 
 ### Cloud Integrations
 
-- **Garmin Connect** - Download activities, daily summaries, sleep, stress, body battery
+- **Garmin Activity API** - Official OAuth 2.0 PKCE integration with webhook push notifications, backfill and deregistration
+- **Garmin Connect** - Download activities, daily summaries, sleep, stress, body battery (unofficial, password-based)
 - **Strava** - OAuth authentication, activity upload, stream data retrieval
 
 ### Training Analysis
@@ -152,12 +153,25 @@ console.log(`Predicted marathon: ${predictions.marathon}`)
 ### Cloud Integration
 
 ```typescript
-import { GarminConnectClient, StravaClient } from 'ts-watches'
+import { GarminActivityApiClient, GarminConnectClient, StravaClient } from 'ts-watches'
 
-// Garmin Connect
-const garmin = new GarminConnectClient()
-await garmin.login('email@example.com', 'password')
-const activities = await garmin.getActivities(new Date('2024-01-01'))
+// Garmin Activity API (official, OAuth 2.0 PKCE, push notifications).
+// The athlete approves on Garmin's own site and can revoke at any time.
+const garmin = new GarminActivityApiClient({
+  clientId: process.env.GARMIN_CLIENT_ID!,
+  clientSecret: process.env.GARMIN_CLIENT_SECRET!,
+  redirectUri: 'https://example.com/garmin/callback',
+})
+
+const { verifier, challenge } = createPkcePair()
+const url = garmin.buildAuthorizationUrl({ state, challenge }) // send the athlete here
+const tokens = await garmin.exchangeCode(code, verifier) // on the callback
+const userId = await garmin.getUserId(tokens.accessToken) // the key push notifications carry
+
+// Garmin Connect (unofficial; needs the athlete's password, breaks under 2FA)
+const legacy = new GarminConnectClient()
+await legacy.login('email@example.com', 'password')
+const activities = await legacy.getActivities(new Date('2024-01-01'))
 
 // Strava
 const strava = new StravaClient({
