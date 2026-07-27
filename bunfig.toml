@@ -1,2 +1,6 @@
 [install]
+# better-dx ships the build tooling (dtsx, typescript, pickier) as peer
+# dependencies. Without hoisted linking bun-plugin-dtsx cannot resolve
+# @stacksjs/dtsx, and every package build fails before writing any dist.
+linker = "hoisted"
 registry = { url = "https://registry.npmjs.org/", token = "$BUN_AUTH_TOKEN" }
