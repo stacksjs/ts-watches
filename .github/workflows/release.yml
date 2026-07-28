@@ -42,7 +42,11 @@ jobs:
           install: 'false'
           publish: npm
           package-dir: packages/ts-watches
-          token: ${{ secrets.PANTRY_TOKEN }}
+        env:
+          # npm auth comes from the environment; the action's `token`
+          # input is the pantry registry credential, a different thing.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish ts-garmin
         uses: pantry-pm/pantry/packages/action@v0.10.51
@@ -50,7 +54,11 @@ jobs:
           install: 'false'
           publish: npm
           package-dir: packages/ts-garmin
-          token: ${{ secrets.PANTRY_TOKEN }}
+        env:
+          # npm auth comes from the environment; the action's `token`
+          # input is the pantry registry credential, a different thing.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish ts-trainingpeaks
         uses: pantry-pm/pantry/packages/action@v0.10.51
@@ -58,7 +66,11 @@ jobs:
           install: 'false'
           publish: npm
           package-dir: packages/ts-trainingpeaks
-          token: ${{ secrets.PANTRY_TOKEN }}
+        env:
+          # npm auth comes from the environment; the action's `token`
+          # input is the pantry registry credential, a different thing.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Notes come from git history between the previous tag and this one, so a
       # release never depends on someone remembering to edit CHANGELOG.md.
