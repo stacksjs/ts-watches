@@ -71,9 +71,10 @@
     "lint:fix": "bunx --bun pickier . --fix",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "changelog": "bunx changelogen --output CHANGELOG.md",
-    "prepublishOnly": "bun --bun run build && bun run compile:all && bun run zip",
+    "prepublishOnly": "bun --bun run build",
     "release": "bun run changelog && bunx bumpp package.json --all",
-    "test": "bun test"
+    "test": "bun test",
+    "release:binaries": "bun --bun run build && bun run compile:all && bun run zip"
   },
   "devDependencies": {
     "@stacksjs/clapp": "^0.2.0",
