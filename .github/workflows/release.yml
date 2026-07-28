@@ -86,4 +86,15 @@ jobs:
           release: 'true'
           release-files: none
           release-changelog: auto
+          # `auto` walks from the previous tag, which does not exist for a
+          # first release - logsmith then produces nothing and the step fails.
+          # This is the documented fallback for "changelog extraction found
+          # nothing", so the very first release still gets notes.
+          release-notes: |
+            Initial release.
+
+            TypeScript library for downloading, parsing and analysing data from
+            smartwatches and fitness devices: Garmin, Polar, Suunto, Coros,
+            Wahoo and Apple Watch, with FIT parsing, cloud integrations and
+            training analysis.
           release-token: ${{ secrets.GITHUB_TOKEN }}
