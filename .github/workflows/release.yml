@@ -85,11 +85,12 @@ jobs:
           install: 'false'
           release: 'true'
           release-files: none
-          release-changelog: auto
-          # `auto` walks from the previous tag, which does not exist for a
-          # first release - logsmith then produces nothing and the step fails.
-          # This is the documented fallback for "changelog extraction found
-          # nothing", so the very first release still gets notes.
+          # Left at the default (CHANGELOG.md). `auto` regenerates notes from
+          # git history, but hard-fails when logsmith produces nothing rather
+          # than falling through - and it produces nothing for a first release,
+          # which has no previous tag to walk from. File extraction does fall
+          # through to release-notes below, so both the first release and every
+          # later one get notes.
           release-notes: |
             Initial release.
 
