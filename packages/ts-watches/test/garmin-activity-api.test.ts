@@ -7,6 +7,9 @@ import {
   GarminActivityApiClient,
   isAuthenticWebhook,
   isTokenExpired,
+  OAUTH_ATTEMPT_TTL_MS,
+  openOAuthAttempt,
+  sealOAuthAttempt,
   signState,
   verifyState,
 } from '../src/cloud/garmin-activity-api'
@@ -258,5 +261,40 @@ describe('isTokenExpired', () => {
 
   it('treats an unknown expiry as not expired, leaving the API to decide', () => {
     expect(isTokenExpired({ accessToken: 'a' }, 60, now)).toBe(false)
+  })
+})
+
+describe('sealOAuthAttempt / openOAuthAttempt', () => {
+  const secret = 'signing-key'
+  const attempt = { subject: 7, state: 'abc', verifier: 'v-123', issuedAt: 1_700_000_000_000 }
+
+  it('round-trips an in-flight attempt', () => {
+    const opened = openOAuthAttempt<number>(sealOAuthAttempt(attempt, secret), secret, { now: attempt.issuedAt + 1000 })
+
+    expect(opened).toEqual(attempt)
+  })
+
+  it('refuses an attempt whose subject was edited', () => {
+    // Otherwise someone points their own connection at another person's
+    // account by changing one value in their cookie.
+    const [, signature] = sealOAuthAttempt(attempt, secret).split('.')
+    const forged = Buffer.from(JSON.stringify({ ...attempt, subject: 1 })).toString('base64url')
+
+    expect(openOAuthAttempt(`${forged}.${signature}`, secret, { now: attempt.issuedAt + 1000 })).toBeNull()
+  })
+
+  it('refuses an attempt that has gone stale', () => {
+    const sealed = sealOAuthAttempt(attempt, secret)
+
+    expect(openOAuthAttempt(sealed, secret, { now: attempt.issuedAt + OAUTH_ATTEMPT_TTL_MS + 1 })).toBeNull()
+  })
+
+  it('refuses a different signing key', () => {
+    expect(openOAuthAttempt(sealOAuthAttempt(attempt, 'other'), secret, { now: attempt.issuedAt })).toBeNull()
+  })
+
+  it('refuses malformed input rather than throwing', () => {
+    expect(openOAuthAttempt(undefined, secret)).toBeNull()
+    expect(openOAuthAttempt('not-a-token', secret)).toBeNull()
   })
 })

@@ -401,3 +401,65 @@ export function isTokenExpired(tokens: GarminTokens, skewSeconds = 60, now = Dat
   // by the time the request lands.
   return tokens.expiresAt - skewSeconds <= Math.floor(now / 1000)
 }
+
+/** An in-flight authorization attempt, as it survives the round trip to Garmin. */
+export interface OAuthAttempt<TSubject = string> {
+  /** Who is connecting: a user id, an account key, whatever the app keys on. */
+  subject: TSubject
+  /** Echoed by Garmin and compared on return. The CSRF guard. */
+  state: string
+  /** Redeems the authorization code. Never leaves the server. */
+  verifier: string
+  /** Unix milliseconds. A stale attempt is refused rather than resumed. */
+  issuedAt: number
+}
+
+/** How long an in-flight attempt stays valid, in milliseconds. */
+export const OAUTH_ATTEMPT_TTL_MS = 10 * 60 * 1000
+
+/**
+ * Seal an in-flight attempt into a token safe to hand to a browser.
+ *
+ * The callback is a top-level navigation from Garmin carrying no session, so
+ * the app has to stash who was connecting somewhere the browser holds - which
+ * means the value is under the visitor's control and must be signed. Without a
+ * signature someone edits the subject in their own cookie and attaches their
+ * watch to another person's account.
+ *
+ * This is {@link signState} with the shape the flow actually needs: a subject,
+ * the state parameter, the PKCE verifier, and an issue time so a stale attempt
+ * can be refused instead of silently resumed.
+ */
+export function sealOAuthAttempt<TSubject>(attempt: OAuthAttempt<TSubject>, secret: string): string {
+  return signState(JSON.stringify(attempt), secret)
+}
+
+/**
+ * Open a sealed attempt, or return null when it was tampered with, malformed,
+ * or has expired. Null always means "start again", never "trust it anyway".
+ */
+export function openOAuthAttempt<TSubject = string>(
+  token: string | undefined,
+  secret: string,
+  options: { now?: number, ttlMs?: number } = {},
+): OAuthAttempt<TSubject> | null {
+  const payload = verifyState(token, secret)
+  if (!payload)
+    return null
+
+  try {
+    const parsed = JSON.parse(payload) as OAuthAttempt<TSubject>
+    if (parsed?.subject === undefined || typeof parsed?.verifier !== 'string' || typeof parsed?.state !== 'string')
+      return null
+
+    const now = options.now ?? Date.now()
+    const ttl = options.ttlMs ?? OAUTH_ATTEMPT_TTL_MS
+    if (!parsed.issuedAt || now - parsed.issuedAt > ttl)
+      return null
+
+    return parsed
+  }
+  catch {
+    return null
+  }
+}
