@@ -394,7 +394,7 @@ export class GarminActivityApiClient {
 }
 
 /** Is a token past, or nearly past, its expiry? */
-export function isTokenExpired(tokens: GarminTokens, skewSeconds = 60, now = Date.now()): boolean {
+export function isTokenExpired(tokens: GarminTokens, skewSeconds: number = 60, now: number = Date.now()): boolean {
   if (!tokens.expiresAt)
     return false
   // The skew covers the round trip: a token with two seconds left is expired
@@ -415,7 +415,7 @@ export interface OAuthAttempt<TSubject = string> {
 }
 
 /** How long an in-flight attempt stays valid, in milliseconds. */
-export const OAUTH_ATTEMPT_TTL_MS = 10 * 60 * 1000
+export const OAUTH_ATTEMPT_TTL_MS: number = 10 * 60 * 1000
 
 /**
  * Seal an in-flight attempt into a token safe to hand to a browser.
