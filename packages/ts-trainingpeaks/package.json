@@ -1,7 +1,7 @@
 {
   "name": "ts-trainingpeaks",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Zero-dependency TrainingPeaks API client with browser-based authentication",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",

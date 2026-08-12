@@ -1,7 +1,7 @@
 {
   "name": "ts-garmin",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript library for interfacing with Garmin Connect API",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",

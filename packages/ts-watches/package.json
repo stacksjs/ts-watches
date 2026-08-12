@@ -1,7 +1,7 @@
 {
   "name": "ts-watches",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript library for downloading and parsing data from smartwatches (Garmin, etc.)",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
