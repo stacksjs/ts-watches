@@ -37,7 +37,7 @@ jobs:
         run: bun run build
 
       - name: Publish ts-watches
-        uses: pantry-pm/pantry/packages/action@v0.10.51
+        uses: pantry-pm/pantry/packages/action@v0.11.55
         with:
           install: 'false'
           publish: npm
@@ -49,7 +49,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish ts-garmin
-        uses: pantry-pm/pantry/packages/action@v0.10.51
+        uses: pantry-pm/pantry/packages/action@v0.11.55
         with:
           install: 'false'
           publish: npm
@@ -61,7 +61,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish ts-trainingpeaks
-        uses: pantry-pm/pantry/packages/action@v0.10.51
+        uses: pantry-pm/pantry/packages/action@v0.11.55
         with:
           install: 'false'
           publish: npm
@@ -80,7 +80,7 @@ jobs:
       # than attaching nothing. Cross-compiled artifacts can be added here when
       # the build produces them.
       - name: GitHub release
-        uses: pantry-pm/pantry/packages/action@v0.10.51
+        uses: pantry-pm/pantry/packages/action@v0.11.55
         with:
           install: 'false'
           release: 'true'
