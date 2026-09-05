@@ -77,10 +77,10 @@
     "release:binaries": "bun --bun run build && bun run compile:all && bun run zip"
   },
   "devDependencies": {
-    "@stacksjs/clapp": "^0.2.0",
+    "@stacksjs/clapp": "^0.2.15",
     "@types/bun": "latest",
     "bun-plugin-dtsx": "^0.9.14",
-    "bunfig": "^0.15.9"
+    "bunfig": "^0.15.19"
   },
   "lint-staged": {
     "*.{js,ts}": "bunx --bun pickier . --fix"
