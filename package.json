@@ -5,7 +5,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A comprehensive TypeScript library for downloading, parsing, and analyzing data from smartwatches and fitness devices.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
