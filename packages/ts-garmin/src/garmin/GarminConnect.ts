@@ -11,6 +11,7 @@ import type {
   GCGearId,
   GarminDomain,
   IActivity,
+  IActivityDetails,
   ICountActivities,
   IGarminTokens,
   IOauth1Token,
@@ -150,6 +151,18 @@ export default class GarminConnect {
     if (!activity.activityId)
       throw new Error('Missing activityId')
     return this.client.get<IActivity>(`${this.url.ACTIVITY}${activity.activityId}`)
+  }
+
+  /**
+   * An activity's recorded time series (heart rate, power, speed, timer
+   * time…), downsampled by Garmin to at most `maxChartSize` samples.
+   */
+  async getActivityDetails(activity: { activityId: GCActivityId }, maxChartSize = 2000): Promise<IActivityDetails> {
+    if (!activity.activityId)
+      throw new Error('Missing activityId')
+    return this.client.get<IActivityDetails>(`${this.url.ACTIVITY_BY_ID(activity.activityId)}/details`, {
+      params: { maxChartSize, maxPolylineSize: 0, maxHeatMapSize: 0 },
+    })
   }
 
   async countActivities(): Promise<ICountActivities> {

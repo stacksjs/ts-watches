@@ -54,6 +54,57 @@ export interface DailySummary {
   }
 }
 
+/** One recorded sample from an activity's details. */
+export interface ActivityDetailSample {
+  /** Timer time since the start, in seconds: pauses do not advance it. */
+  seconds: number
+  heartRate: number | null
+  /** Watts. */
+  power: number | null
+  /** Metres per second. */
+  speed: number | null
+}
+
+/**
+ * Garmin Connect's activity details as plain samples. The endpoint sends one
+ * array of values per sample, in the order `metricDescriptors` gives; timer
+ * time is `sumDuration` (seconds), falling back to wall time from
+ * `directTimestamp` (milliseconds) with any gap over a minute counted as a
+ * pause. Samples with no time at all are dropped.
+ */
+export function parseActivityDetails(details: unknown): ActivityDetailSample[] {
+  const data = details as { metricDescriptors?: Array<{ metricsIndex: number, key: string }>, activityDetailMetrics?: Array<{ metrics?: Array<number | null> }> } | null
+  const descriptors = Array.isArray(data?.metricDescriptors) ? data!.metricDescriptors : []
+  const rows = Array.isArray(data?.activityDetailMetrics) ? data!.activityDetailMetrics : []
+  const index = (key: string) => descriptors.find(d => d.key === key)?.metricsIndex ?? -1
+  const at = { duration: index('sumDuration'), timestamp: index('directTimestamp'), hr: index('directHeartRate'), power: index('directPower'), speed: index('directSpeed') }
+  const value = (row: Array<number | null>, i: number): number | null => {
+    if (i < 0) return null
+    const v = row[i]
+    return typeof v === 'number' && Number.isFinite(v) ? v : null
+  }
+
+  const samples: ActivityDetailSample[] = []
+  let wall = 0
+  let lastStamp: number | null = null
+  for (const row of rows) {
+    const metrics = Array.isArray(row?.metrics) ? row.metrics : []
+    let seconds = value(metrics, at.duration)
+    if (seconds === null) {
+      const stamp = value(metrics, at.timestamp)
+      if (stamp === null) continue
+      if (lastStamp !== null) wall += Math.min(Math.max(0, (stamp - lastStamp) / 1000), 60)
+      lastStamp = stamp
+      seconds = wall
+    }
+    const hr = value(metrics, at.hr)
+    const power = value(metrics, at.power)
+    const speed = value(metrics, at.speed)
+    samples.push({ seconds, heartRate: hr && hr > 0 ? hr : null, power: power !== null && power >= 0 ? power : null, speed: speed !== null && speed >= 0 ? speed : null })
+  }
+  return samples
+}
+
 export class GarminConnectClient {
   private client: GarminConnect
   private isLoggedIn = false
@@ -101,6 +152,16 @@ export class GarminConnectClient {
     this.ensureLoggedIn()
     const data = await this.client.getActivity({ activityId })
     return this.parseActivityResponse(data)
+  }
+
+  /**
+   * An activity's recorded heart rate, power and speed over timer time,
+   * downsampled by Garmin to at most `maxSamples`: enough for time in zone
+   * without downloading the file.
+   */
+  async getActivityDetails(activityId: number, maxSamples = 2000): Promise<ActivityDetailSample[]> {
+    this.ensureLoggedIn()
+    return parseActivityDetails(await this.client.getActivityDetails({ activityId }, maxSamples))
   }
 
   async downloadActivityFit(activityId: number, outputDir: string): Promise<void> {

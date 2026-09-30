@@ -403,3 +403,23 @@ export interface IActivityDetails {
     maxDistance: number
   }[] | null
 }
+
+/** One series in an activity's details, e.g. directHeartRate or sumDuration. */
+export interface IActivityDetailMetricDescriptor {
+  metricsIndex: number
+  key: string
+  unit?: { id?: number, key?: string, factor?: number }
+}
+
+/**
+ * An activity's recorded time series from activity-service's details
+ * endpoint: `activityDetailMetrics[i].metrics[metricsIndex]` is sample i of
+ * the series the descriptor names. Garmin downsamples to `maxChartSize`.
+ */
+export interface IActivityDetails {
+  activityId: number
+  measurementCount?: number
+  metricsCount?: number
+  metricDescriptors: IActivityDetailMetricDescriptor[]
+  activityDetailMetrics: Array<{ metrics: Array<number | null> }>
+}
