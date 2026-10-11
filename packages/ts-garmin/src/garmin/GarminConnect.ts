@@ -178,18 +178,21 @@ export default class GarminConnect {
     })
   }
 
-  async downloadOriginalActivityData(
+  /**
+   * An activity's original recording, as bytes.
+   *
+   * `zip` is Connect's "Export Original": a zip holding the file the device
+   * recorded (usually a `.fit`). `tcx`, `gpx` and `kml` are Garmin's
+   * conversions. `filename` is `{activityId}.{type}`, the name
+   * `downloadOriginalActivityData` writes it under.
+   */
+  async getOriginalActivityData(
     activity: { activityId: GCActivityId },
-    dir: string,
     type: ExportFileTypeValue = 'zip',
-  ): Promise<void> {
+  ): Promise<{ bytes: Uint8Array, filename: string }> {
     if (!activity.activityId)
       throw new Error('Missing activityId')
-    if (!checkIsDirectory(dir)) {
-      createDirectory(dir)
-    }
 
-    let fileBuffer: ArrayBuffer
     let url: string
 
     if (type === 'tcx') {
@@ -205,11 +208,29 @@ export default class GarminConnect {
       url = `${this.url.DOWNLOAD_ZIP}${activity.activityId}`
     }
     else {
-      throw new Error(`downloadOriginalActivityData - Invalid type: ${type}`)
+      throw new Error(`getOriginalActivityData - Invalid type: ${type}`)
     }
 
-    fileBuffer = await this.client.get<ArrayBuffer>(url, { responseType: 'arraybuffer' })
-    writeToFile(path.join(dir, `${activity.activityId}.${type}`), Buffer.from(fileBuffer))
+    const body = await this.client.get<ArrayBuffer>(url, { responseType: 'arraybuffer' })
+    return { bytes: new Uint8Array(body), filename: `${activity.activityId}.${type}` }
+  }
+
+  /**
+   * Write an activity's original recording into `dir` (created if missing)
+   * as `{activityId}.{type}`, and return the path written.
+   */
+  async downloadOriginalActivityData(
+    activity: { activityId: GCActivityId },
+    dir: string,
+    type: ExportFileTypeValue = 'zip',
+  ): Promise<string> {
+    const { bytes, filename } = await this.getOriginalActivityData(activity, type)
+    if (!checkIsDirectory(dir)) {
+      createDirectory(dir)
+    }
+    const file = path.join(dir, filename)
+    writeToFile(file, bytes)
+    return file
   }
 
   async uploadActivity(file: string, format: UploadFileTypeValue = 'fit'): Promise<unknown> {

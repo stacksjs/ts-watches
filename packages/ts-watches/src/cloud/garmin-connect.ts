@@ -1,9 +1,24 @@
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { GarminConnect } from 'ts-garmin'
 import type { Activity, SleepData, StressData, BodyBattery, HRVData, WeightData } from '../types'
 
 export interface GarminConnectConfig {
   username: string
   password: string
+}
+
+/**
+ * What Connect can export an activity as. `zip` is "Export Original", the
+ * device's own recording; the rest are Garmin's conversions.
+ */
+export type GarminExportFormat = 'zip' | 'tcx' | 'gpx' | 'kml'
+
+/** A downloaded activity file, held in memory. */
+export interface OriginalActivityFile {
+  bytes: Uint8Array
+  /** `{activityId}.{format}`. */
+  filename: string
 }
 
 export interface GarminActivitySummary {
@@ -164,9 +179,33 @@ export class GarminConnectClient {
     return parseActivityDetails(await this.client.getActivityDetails({ activityId }, maxSamples))
   }
 
-  async downloadActivityFit(activityId: number, outputDir: string): Promise<void> {
+  /**
+   * An activity's original recording, in memory.
+   *
+   * The default `zip` is Connect's "Export Original": a zip holding the file
+   * the device recorded, usually a `.fit`, and the only place Connect gives
+   * out an activity's GPS track. `tcx`, `gpx` and `kml` are Garmin's own
+   * conversions. `filename` is `{activityId}.{format}`, the name
+   * `downloadActivityFit` writes it under.
+   *
+   * Nothing touches the disk, so a server that only parses the recording has
+   * no temporary directory to make or clean up.
+   */
+  async downloadOriginalActivity(activityId: number, format: GarminExportFormat = 'zip'): Promise<OriginalActivityFile> {
     this.ensureLoggedIn()
-    await this.client.downloadOriginalActivityData({ activityId }, outputDir, 'zip')
+    return this.client.getOriginalActivityData({ activityId }, format)
+  }
+
+  /**
+   * Write an activity's "Export Original" zip into `outputDir`, creating it
+   * if need be, as `{activityId}.zip`. Returns the path written.
+   */
+  async downloadActivityFit(activityId: number, outputDir: string): Promise<string> {
+    const { bytes, filename } = await this.downloadOriginalActivity(activityId, 'zip')
+    await mkdir(outputDir, { recursive: true })
+    const file = join(outputDir, filename)
+    await writeFile(file, bytes)
+    return file
   }
 
   async getDailySummary(date: Date): Promise<DailySummary> {

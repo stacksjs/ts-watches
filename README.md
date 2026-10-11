@@ -172,6 +172,7 @@ const userId = await garmin.getUserId(tokens.accessToken) // the key push notifi
 const legacy = new GarminConnectClient()
 await legacy.login('email@example.com', 'password')
 const activities = await legacy.getActivities(new Date('2024-01-01'))
+const { bytes, filename } = await legacy.downloadOriginalActivity(activityId) // "Export Original" zip, in memory
 
 // Strava
 const strava = new StravaClient({

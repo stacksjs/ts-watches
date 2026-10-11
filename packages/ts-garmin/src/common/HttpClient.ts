@@ -212,13 +212,15 @@ export class HttpClient {
       throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${text}`)
     }
 
+    // Asked for bytes, so bytes: a download must not come back parsed just
+    // because the server labelled it JSON.
+    if (responseType === 'arraybuffer') {
+      return response.arrayBuffer() as Promise<T>
+    }
+
     const contentType = response.headers.get('content-type')
     if (contentType?.includes('application/json')) {
       return response.json() as Promise<T>
-    }
-
-    if (responseType === 'arraybuffer') {
-      return response.arrayBuffer() as Promise<T>
     }
 
     return response.text() as Promise<T>

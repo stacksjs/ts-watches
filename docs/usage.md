@@ -351,6 +351,13 @@ console.log(`Calories: ${summary.calories}`)
 const sleep = await client.getSleepData(new Date())
 const stress = await client.getStressData(new Date())
 const hrv = await client.getHRVData(new Date())
+
+// The original recording (Connect's "Export Original" zip), in memory:
+// the only place Connect gives out an activity's GPS track
+const { bytes, filename } = await client.downloadOriginalActivity(activityId)
+
+// ...or written to disk, returning the path (`exports/{activityId}.zip`)
+const path = await client.downloadActivityFit(activityId, './exports')
 ```
 
 ### Strava

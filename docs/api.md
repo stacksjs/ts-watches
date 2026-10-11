@@ -429,11 +429,21 @@ class GarminConnectClient {
   logout(): Promise<void>
   getActivities(since?: Date, limit?: number): Promise<GarminActivity[]>
   getActivity(activityId: string): Promise<GarminActivity>
+  getActivityDetails(activityId: number, maxSamples?: number): Promise<ActivityDetailSample[]>
+  // The original recording in memory; `zip` is Connect's "Export Original"
+  downloadOriginalActivity(activityId: number, format?: 'zip' | 'tcx' | 'gpx' | 'kml'): Promise<OriginalActivityFile>
+  // The same zip written to `{outputDir}/{activityId}.zip`; returns that path
+  downloadActivityFit(activityId: number, outputDir: string): Promise<string>
   getDailySummary(date: Date): Promise<DailySummary>
   getSleepData(date: Date): Promise<SleepData>
   getStressData(date: Date): Promise<StressData[]>
   getHRVData(date: Date): Promise<HRVData[]>
   getBodyBattery(date: Date): Promise<BodyBattery[]>
+}
+
+interface OriginalActivityFile {
+  bytes: Uint8Array
+  filename: string // `{activityId}.{format}`
 }
 ```
 
