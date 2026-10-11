@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.2...v0.1.3)
+
+## 🚀 Features
+
+- **garmin**: download an activity's original recording as bytes ([aedb79e](https://github.com/stacksjs/ts-watches/commit/aedb79e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.3 ([9454271](https://github.com/stacksjs/ts-watches/commit/9454271)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.1...v0.1.2)
 
 ## 🚀 Features
