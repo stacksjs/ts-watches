@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.3...v0.1.4)
+
+## 🚀 Features
+
+- **garmin**: create, schedule, update and delete Connect workouts ([08cf3ea](https://github.com/stacksjs/ts-watches/commit/08cf3ea)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.4 ([72f266e](https://github.com/stacksjs/ts-watches/commit/72f266e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.2...v0.1.3)
 
 ## 🚀 Features
