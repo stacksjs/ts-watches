@@ -282,11 +282,28 @@ export default class GarminConnect {
     return this.client.delete(this.url.WORKOUT(workout.workoutId))
   }
 
+  /**
+   * Replace a workout in place: Connect's editor sends the whole workout,
+   * `workoutId` included, so the id and anything scheduled with it stay.
+   */
+  async updateWorkout(workout: { workoutId: string }, detail: Record<string, unknown>): Promise<unknown> {
+    if (!workout.workoutId)
+      throw new Error('Missing workoutId')
+    return this.client.put(this.url.WORKOUT(workout.workoutId), { ...detail, workoutId: Number(workout.workoutId) })
+  }
+
   async scheduleWorkout(workout: { workoutId: string }, scheduleDate: string): Promise<unknown> {
     return this.client.post(
       this.url.SCHEDULE_WORKOUT(Number.parseInt(workout.workoutId)),
       { date: scheduleDate },
     )
+  }
+
+  /** Take one scheduling of a workout off the calendar; the workout stays in the library. */
+  async unscheduleWorkout(schedule: { workoutScheduleId: string }): Promise<unknown> {
+    if (!schedule.workoutScheduleId)
+      throw new Error('Missing workoutScheduleId')
+    return this.client.delete(this.url.WORKOUT_SCHEDULE(schedule.workoutScheduleId))
   }
 
   async getSteps(date: Date = new Date()): Promise<number> {

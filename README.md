@@ -173,6 +173,10 @@ const legacy = new GarminConnectClient()
 await legacy.login('email@example.com', 'password')
 const activities = await legacy.getActivities(new Date('2024-01-01'))
 const { bytes, filename } = await legacy.downloadOriginalActivity(activityId) // "Export Original" zip, in memory
+// Structured workouts onto the watch: into the library, then onto a day
+const { workoutId } = await legacy.createWorkout(workout) // Connect's workout JSON
+const { workoutScheduleId } = await legacy.scheduleWorkout(workoutId, '2026-10-20')
+await legacy.deleteWorkout(workoutId) // a 404 counts as done
 
 // Strava
 const strava = new StravaClient({

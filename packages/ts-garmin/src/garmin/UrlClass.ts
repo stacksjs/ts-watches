@@ -164,6 +164,11 @@ export class UrlClass {
     return `${this.GC_API}/workout-service/schedule/${workoutId}`
   }
 
+  /** One scheduling of a workout, by the id `SCHEDULE_WORKOUT` answered with. */
+  WORKOUT_SCHEDULE(workoutScheduleId: string | number): string {
+    return `${this.GC_API}/workout-service/schedule/${workoutScheduleId}`
+  }
+
   get IMPORT_GPX_FILE(): string {
     return `${this.GC_API}/course-service/course/import`
   }

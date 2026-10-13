@@ -358,6 +358,18 @@ const { bytes, filename } = await client.downloadOriginalActivity(activityId)
 
 // ...or written to disk, returning the path (`exports/{activityId}.zip`)
 const path = await client.downloadActivityFit(activityId, './exports')
+
+// A structured workout onto the watch: Connect's workout JSON (the shape its
+// editor sends) into the library, then onto a day of the calendar
+const { workoutId } = await client.createWorkout({
+  workoutName: '6 x 800 m',
+  sportType: { sportTypeId: 1, sportTypeKey: 'running' },
+  workoutSegments: [{ segmentOrder: 1, sportType: { sportTypeId: 1, sportTypeKey: 'running' }, workoutSteps }],
+})
+const { workoutScheduleId } = await client.scheduleWorkout(workoutId, '2026-10-20')
+// Changed or cancelled: take it back off (already gone counts as done)
+await client.unscheduleWorkout(workoutScheduleId!)
+await client.deleteWorkout(workoutId)
 ```
 
 ### Strava

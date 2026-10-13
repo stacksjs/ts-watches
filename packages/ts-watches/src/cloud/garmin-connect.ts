@@ -120,6 +120,53 @@ export function parseActivityDetails(details: unknown): ActivityDetailSample[] {
   return samples
 }
 
+/**
+ * A workout as Garmin Connect's workout service takes it: the JSON its own
+ * workout editor sends to `/workout-service/workout`. Typed loosely on
+ * purpose: the vocabulary (sport, step type, end condition and target ids) is
+ * Garmin's and undocumented, so callers build it and this only carries it.
+ */
+export interface GarminConnectWorkout {
+  workoutName: string
+  description?: string | null
+  sportType: { sportTypeId: number, sportTypeKey: string, displayOrder?: number }
+  workoutSegments: Array<{
+    segmentOrder: number
+    sportType: { sportTypeId: number, sportTypeKey: string, displayOrder?: number }
+    workoutSteps: Array<Record<string, unknown>>
+  }>
+  [key: string]: unknown
+}
+
+/** A workout Connect holds, as far as a caller needs to keep track of it. */
+export interface GarminConnectWorkoutRef {
+  /** Connect's id for the workout, as a string. */
+  workoutId: string
+}
+
+/** One scheduling of a workout on the athlete's Connect calendar. */
+export interface GarminConnectSchedule {
+  /** Connect's id for this scheduling, or null when it answered without one. */
+  workoutScheduleId: string | null
+  /** The day, YYYY-MM-DD. */
+  date: string
+}
+
+const YMD = /^\d{4}-\d{2}-\d{2}$/
+
+function idOf(value: unknown): string | null {
+  if (typeof value === 'number' && Number.isFinite(value))
+    return String(value)
+  if (typeof value === 'string' && value.trim())
+    return value.trim()
+  return null
+}
+
+/** Whether an error from Connect is a 404: the thing asked about is not there. */
+export function isGarminNotFound(error: unknown): boolean {
+  return /HTTP Error: 404\b/.test(String((error as { message?: unknown })?.message ?? error))
+}
+
 export class GarminConnectClient {
   private client: GarminConnect
   private isLoggedIn = false
@@ -206,6 +253,77 @@ export class GarminConnectClient {
     const file = join(outputDir, filename)
     await writeFile(file, bytes)
     return file
+  }
+
+  /**
+   * Put a structured workout in the athlete's Connect workout library, from
+   * where Garmin syncs it to the watch. Answers with Connect's id for it.
+   */
+  async createWorkout(workout: GarminConnectWorkout): Promise<GarminConnectWorkoutRef> {
+    this.ensureLoggedIn()
+    const created = await this.client.createWorkout(workout as never) as unknown as { workoutId?: unknown }
+    const workoutId = idOf(created?.workoutId)
+    if (!workoutId)
+      throw new Error('Garmin Connect accepted the workout but did not say which one it is')
+    return { workoutId }
+  }
+
+  /** A workout as Connect holds it, or null when it is not there (deleted on the watch or in Connect). */
+  async getWorkout(workoutId: string): Promise<Record<string, unknown> | null> {
+    this.ensureLoggedIn()
+    try {
+      return await this.client.getWorkoutDetail({ workoutId: String(workoutId) }) as unknown as Record<string, unknown>
+    }
+    catch (error) {
+      if (isGarminNotFound(error))
+        return null
+      throw error
+    }
+  }
+
+  /** Replace a workout in place, keeping its id and its schedulings. */
+  async updateWorkout(workoutId: string, workout: GarminConnectWorkout): Promise<void> {
+    this.ensureLoggedIn()
+    await this.client.updateWorkout({ workoutId: String(workoutId) }, workout)
+  }
+
+  /**
+   * Take a workout out of the library. One already gone counts as done:
+   * that is the outcome asked for.
+   */
+  async deleteWorkout(workoutId: string): Promise<void> {
+    this.ensureLoggedIn()
+    try {
+      await this.client.deleteWorkout({ workoutId: String(workoutId) })
+    }
+    catch (error) {
+      if (!isGarminNotFound(error))
+        throw error
+    }
+  }
+
+  /** Put a library workout on a day of the athlete's Connect calendar (YYYY-MM-DD). */
+  async scheduleWorkout(workoutId: string, date: string): Promise<GarminConnectSchedule> {
+    this.ensureLoggedIn()
+    if (!YMD.test(date))
+      throw new Error(`Not a day: ${date} (expected YYYY-MM-DD)`)
+    const scheduled = await this.client.scheduleWorkout({ workoutId: String(workoutId) }, date) as { workoutScheduleId?: unknown, calendarDate?: unknown } | null
+    return {
+      workoutScheduleId: idOf(scheduled?.workoutScheduleId),
+      date: typeof scheduled?.calendarDate === 'string' && YMD.test(scheduled.calendarDate) ? scheduled.calendarDate : date,
+    }
+  }
+
+  /** Take one scheduling off the calendar; the workout stays in the library. Already gone counts as done. */
+  async unscheduleWorkout(workoutScheduleId: string): Promise<void> {
+    this.ensureLoggedIn()
+    try {
+      await this.client.unscheduleWorkout({ workoutScheduleId: String(workoutScheduleId) })
+    }
+    catch (error) {
+      if (!isGarminNotFound(error))
+        throw error
+    }
   }
 
   async getDailySummary(date: Date): Promise<DailySummary> {

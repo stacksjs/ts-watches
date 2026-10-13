@@ -434,6 +434,13 @@ class GarminConnectClient {
   downloadOriginalActivity(activityId: number, format?: 'zip' | 'tcx' | 'gpx' | 'kml'): Promise<OriginalActivityFile>
   // The same zip written to `{outputDir}/{activityId}.zip`; returns that path
   downloadActivityFit(activityId: number, outputDir: string): Promise<string>
+  // Structured workouts: Connect's own workout JSON, into the library and onto a day
+  createWorkout(workout: GarminConnectWorkout): Promise<{ workoutId: string }>
+  getWorkout(workoutId: string): Promise<Record<string, unknown> | null> // null when gone
+  updateWorkout(workoutId: string, workout: GarminConnectWorkout): Promise<void> // keeps id + schedulings
+  deleteWorkout(workoutId: string): Promise<void> // a 404 counts as done
+  scheduleWorkout(workoutId: string, date: string): Promise<{ workoutScheduleId: string | null, date: string }>
+  unscheduleWorkout(workoutScheduleId: string): Promise<void> // the workout stays in the library
   getDailySummary(date: Date): Promise<DailySummary>
   getSleepData(date: Date): Promise<SleepData>
   getStressData(date: Date): Promise<StressData[]>
