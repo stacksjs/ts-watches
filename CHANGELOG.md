@@ -1,3 +1,18 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.4...v0.1.5)
+
+## 🚀 Features
+
+- expose browser-safe Bluetooth heart rate decoding ([09fec06](https://github.com/stacksjs/ts-watches/commit/09fec06)) _(by Chris Breuer <chris@stacksjs.com>)_
+
+## 🧹 Chores
+
+- release v0.1.5 ([151e1bd](https://github.com/stacksjs/ts-watches/commit/151e1bd)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _Chris Breuer <chris@stacksjs.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.3...v0.1.4)
 
 ## 🚀 Features
