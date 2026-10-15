@@ -3,6 +3,7 @@ import { dts } from 'bun-plugin-dtsx'
 
 const entrypoints = [
   'src/index.ts',
+  'src/realtime/bluetooth.ts',
   'src/fit/index.ts',
   'src/drivers/index.ts',
   'bin/cli.ts',
@@ -27,7 +28,7 @@ const result = await Bun.build({
 if (!result.success)
   throw new Error(`ts-watches build failed: ${result.logs.map(log => log.message).join('; ')}`)
 
-for (const output of ['dist/src/index.js', 'dist/src/fit/index.js', 'dist/src/drivers/index.js']) {
+for (const output of ['dist/src/index.js', 'dist/src/realtime/bluetooth.js', 'dist/src/fit/index.js', 'dist/src/drivers/index.js']) {
   if (!await Bun.file(output).exists())
     throw new Error(`ts-watches build did not create ${output}`)
 }

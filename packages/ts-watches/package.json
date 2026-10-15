@@ -30,6 +30,10 @@
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js"
     },
+    "./bluetooth": {
+      "types": "./dist/src/realtime/bluetooth.d.ts",
+      "import": "./dist/src/realtime/bluetooth.js"
+    },
     "./fit": {
       "types": "./dist/src/fit/index.d.ts",
       "import": "./dist/src/fit/index.js"

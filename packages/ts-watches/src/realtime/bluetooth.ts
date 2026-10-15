@@ -175,12 +175,18 @@ export interface BleScanner {
  * Parse heart rate measurement characteristic value
  */
 export function parseHeartRateMeasurement(data: DataView): BleHeartRateData {
+  if (data.byteLength < 2)
+    throw new RangeError('Incomplete Bluetooth heart rate measurement')
   const flags = data.getUint8(0)
   const is16Bit = (flags & 0x01) !== 0
   const hasContact = (flags & 0x02) !== 0
   const contactSupported = (flags & 0x04) !== 0
   const hasEnergyExpended = (flags & 0x08) !== 0
   const hasRrInterval = (flags & 0x10) !== 0
+
+  const required = 1 + (is16Bit ? 2 : 1) + (hasEnergyExpended ? 2 : 0)
+  if (data.byteLength < required || (hasRrInterval && (data.byteLength < required + 2 || (data.byteLength - required) % 2 !== 0)))
+    throw new RangeError('Incomplete Bluetooth heart rate measurement')
 
   let offset = 1
   const heartRate = is16Bit ? data.getUint16(offset, true) : data.getUint8(offset)
