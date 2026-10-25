@@ -10,7 +10,7 @@ const entrypoints = [
 ]
 
 const result = await Bun.build({
-  entrypoints,
+  entrypoints: entrypoints.filter(entry => entry !== 'src/realtime/bluetooth.ts'),
   outdir: './dist',
   target: 'node',
   format: 'esm',
@@ -28,7 +28,24 @@ const result = await Bun.build({
 if (!result.success)
   throw new Error(`ts-watches build failed: ${result.logs.map(log => log.message).join('; ')}`)
 
+// Build this portable subpath separately: sharing a Node bundle also shares
+// its require bootstrap, even when Bluetooth itself has no imports.
+const bluetooth = await Bun.build({
+  entrypoints: ['src/realtime/bluetooth.ts'],
+  outdir: './dist/src/realtime',
+  target: 'browser',
+  format: 'esm',
+  minify: true,
+})
+if (!bluetooth.success)
+  throw new Error(`ts-watches Bluetooth build failed: ${bluetooth.logs.map(log => log.message).join('; ')}`)
+
 for (const output of ['dist/src/index.js', 'dist/src/realtime/bluetooth.js', 'dist/src/fit/index.js', 'dist/src/drivers/index.js']) {
   if (!await Bun.file(output).exists())
     throw new Error(`ts-watches build did not create ${output}`)
 }
+
+// Native hosts need the Bluetooth parser without Node/CLI bootstrap chunks.
+const bluetoothCode = await Bun.file('dist/src/realtime/bluetooth.js').text()
+if (new Bun.Transpiler({ loader: 'js' }).scanImports(bluetoothCode).length || /\bimport\.meta\b/.test(bluetoothCode))
+  throw new Error('Bluetooth entry must be self-contained and usable in a native JavaScript host')
