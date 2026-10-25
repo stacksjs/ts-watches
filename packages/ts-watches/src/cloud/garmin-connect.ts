@@ -68,9 +68,9 @@ export interface DailySummary {
   hrv?: HRVData
   steps?: {
     total: number
-    goal: number
-    distance: number
-    calories: number
+    goal?: number
+    distance?: number
+    calories?: number
   }
 }
 
@@ -466,18 +466,15 @@ export class GarminConnectClient {
     }
   }
 
-  async getStepsData(date: Date): Promise<{ total: number, goal: number, distance: number, calories: number } | undefined> {
+  async getStepsData(date: Date): Promise<{ total: number, goal?: number, distance?: number, calories?: number } | undefined> {
     this.ensureLoggedIn()
-
+    const day = date.toISOString().slice(0, 10)
+    this.metricDay(day)
     try {
-      const total = await this.client.getSteps(date)
-
-      return {
-        total,
-        goal: 10000,
-        distance: 0,
-        calories: 0,
-      }
+      const days = await this.client.get<Array<{ calendarDate: string, totalSteps: number, stepGoal?: number, totalDistance?: number }>>(`https://connectapi.garmin.com/usersummary-service/stats/steps/daily/${day}/${day}`)
+      const data = days.find(row => row.calendarDate === day)
+      if (!data || !Number.isFinite(data.totalSteps)) return undefined
+      return { total: data.totalSteps, goal: data.stepGoal, distance: data.totalDistance }
     }
     catch (error) {
       if (isGarminNotFound(error)) return undefined
@@ -539,28 +536,31 @@ export class GarminConnectClient {
     this.ensureLoggedIn()
 
     try {
-      const data = await this.client.getBodyBattery(date)
+      const data = await this.client.getStressData(date) as unknown as { bodyBatteryValueDescriptorsDTOList?: Array<{ bodyBatteryValueDescriptorIndex: number, bodyBatteryValueDescriptorKey: string }>, bodyBatteryValuesArray?: Array<Array<number | string | null>>, bodyBatteryChargedValue?: number, bodyBatteryDrainedValue?: number }
       if (!data)
         return undefined
 
+      const descriptors = data.bodyBatteryValueDescriptorsDTOList || []
+      const column = (key: string, fallback: number) => descriptors.find(d => d.bodyBatteryValueDescriptorKey === key)?.bodyBatteryValueDescriptorIndex ?? fallback
+      const time = column('timestamp', 0)
+      // Legacy two-column exports omit descriptors; current Connect has a status column.
+      const level = column('bodyBatteryLevel', data.bodyBatteryValuesArray?.[0]?.length === 2 ? 1 : 2)
       const samples = (data.bodyBatteryValuesArray || [])
-        .filter(([_, level]: [number, number]) => level >= 0)
-        .map(([ts, level]: [number, number]) => ({
-          timestamp: new Date(ts),
-          level,
-        }))
+        .filter(row => typeof row[time] === 'number' && typeof row[level] === 'number' && Number.isFinite(row[time]) && Number(row[level]) >= 0 && Number(row[level]) <= 100)
+        .map(row => ({ timestamp: new Date(Number(row[time])), level: Number(row[level]) }))
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
 
       const levels = samples.map(s => s.level)
       const startLevel = levels[0]
       const endLevel = levels[levels.length - 1]
-      if (!levels.length && data.charged == null && data.drained == null) return undefined
+      if (!levels.length && data.bodyBatteryChargedValue == null && data.bodyBatteryDrainedValue == null) return undefined
 
       return {
         date,
         startLevel,
         endLevel,
-        chargedValue: data.charged,
-        drainedValue: data.drained,
+        chargedValue: data.bodyBatteryChargedValue,
+        drainedValue: data.bodyBatteryDrainedValue,
         samples,
       }
     }
