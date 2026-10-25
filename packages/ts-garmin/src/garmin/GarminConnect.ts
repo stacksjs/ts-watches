@@ -503,10 +503,13 @@ export default class GarminConnect {
     }
   }
 
-  async getHrvData(date: Date = new Date()): Promise<HrvData> {
+  async getHrvData(date: Date = new Date()): Promise<HrvData | undefined> {
     try {
       const dateString = toDateString(date)
-      const hrvData = await this.client.get<HrvData>(this.url.HRV_DATA(dateString))
+      const hrvData = await this.client.get<HrvData | undefined>(this.url.HRV_DATA(dateString))
+
+      if (hrvData === undefined)
+        return undefined
 
       if (!hrvData) {
         throw new Error('Invalid or empty HRV data response.')

@@ -79,3 +79,29 @@ test('missing Garmin wellness days do not become measured stress or sleep', asyn
   expect(await client.getStressData(day)).toBeUndefined()
   expect(await client.getSleepData(day)).toBeUndefined()
 })
+
+test('HRV accepts a successful no-content day and still reads the next measured night', async () => {
+  const client = connected()
+  for (const headers of [{}, { 'content-type': 'application/json' }]) {
+    globalThis.fetch = (async () => new Response(null, { status: 204, headers })) as unknown as typeof fetch
+    expect(await client.getHrvData(day)).toBeUndefined()
+  }
+  globalThis.fetch = (async () => Response.json({
+    hrvSummary: { weeklyAvg: 48, lastNightAvg: 52, status: 'BALANCED' },
+    hrvReadings: [{ readingTimeGMT: '2026-10-24T04:00:00Z', hrvValue: 51 }],
+  })) as unknown as typeof fetch
+  expect(await client.getHrvData(day)).toMatchObject({
+    weeklyAverage: 48, lastNightAverage: 52, status: 'balanced',
+    samples: [{ timestamp: new Date('2026-10-24T04:00:00Z'), hrv: 51 }],
+  })
+})
+
+test('HRV never treats a denied, throttled, failed or malformed response as an empty day', async () => {
+  const client = connected()
+  for (const status of [401, 403, 429, 500]) {
+    globalThis.fetch = (async () => Response.json({ error: 'unavailable' }, { status })) as unknown as typeof fetch
+    await expect(client.getHrvData(day)).rejects.toThrow(String(status))
+  }
+  globalThis.fetch = (async () => Response.json(null)) as unknown as typeof fetch
+  await expect(client.getHrvData(day)).rejects.toThrow('Invalid or empty HRV data response')
+})

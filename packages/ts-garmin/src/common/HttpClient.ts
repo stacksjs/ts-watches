@@ -218,6 +218,10 @@ export class HttpClient {
       return response.arrayBuffer() as Promise<T>
     }
 
+    // A successful empty day has no JSON to decode, even with a JSON header.
+    if (response.status === 204)
+      return undefined as T
+
     const contentType = response.headers.get('content-type')
     if (contentType?.includes('application/json')) {
       return response.json() as Promise<T>
