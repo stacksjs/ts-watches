@@ -204,6 +204,8 @@ export interface SleepStage {
 }
 
 export interface SleepData {
+  /** Original provider measurement fields for lossless downstream archives. */
+  details?: unknown
   date: Date
   startTime: Date
   endTime: Date
@@ -220,6 +222,8 @@ export interface SleepData {
 }
 
 export interface StressData {
+  /** Original provider measurement fields for lossless downstream archives. */
+  details?: unknown
   date: Date
   avgStressLevel?: number // 0-100
   maxStressLevel?: number
@@ -290,6 +294,8 @@ export interface HRVData {
 }
 
 export interface WeightData {
+  /** Original provider measurement fields for lossless downstream archives. */
+  details?: unknown
   date: Date
   /** Stable provider observation id and measured UTC time, when supplied. */
   id?: string

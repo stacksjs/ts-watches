@@ -72,3 +72,10 @@ test('Body Battery reads the daily stress payload and resolves the level descrip
   expect(await connected().getBodyBatteryData(day)).toMatchObject({ startLevel: 30, endLevel: 0, samples: [{ level: 30 }, { level: 0 }] })
   expect(seen[0]).toContain('/wellness-service/wellness/dailyStress/2026-10-24')
 })
+
+test('missing Garmin wellness days do not become measured stress or sleep', async () => {
+  const client = connected()
+  globalThis.fetch = (async () => Response.json({ avgStressLevel: -1, maxStressLevel: -1, stressValuesArray: [], dailySleepDTO: { sleepStartTimestampGMT: null, sleepEndTimestampGMT: null, sleepTimeSeconds: null } })) as unknown as typeof fetch
+  expect(await client.getStressData(day)).toBeUndefined()
+  expect(await client.getSleepData(day)).toBeUndefined()
+})

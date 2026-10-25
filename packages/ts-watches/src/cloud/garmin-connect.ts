@@ -439,13 +439,15 @@ export class GarminConnectClient {
         return undefined
 
       const dto = data.dailySleepDTO
+      if (!(dto.sleepStartTimestampGMT > 0) || !(dto.sleepEndTimestampGMT > dto.sleepStartTimestampGMT) || !Number.isFinite(dto.sleepTimeSeconds)) return undefined
       const stages = (data.sleepLevels || []).map((level: { startGMT: string, endGMT: string, activityLevel: number }) => ({
         stage: this.mapSleepLevel(level.activityLevel),
-        startTime: new Date(level.startGMT),
-        endTime: new Date(level.endGMT),
+        startTime: new Date(/(?:Z|[+-]\d{2}:?\d{2})$/.test(level.startGMT) ? level.startGMT : `${level.startGMT}Z`),
+        endTime: new Date(/(?:Z|[+-]\d{2}:?\d{2})$/.test(level.endGMT) ? level.endGMT : `${level.endGMT}Z`),
       }))
 
       return {
+        details: data,
         date,
         startTime: new Date(dto.sleepStartTimestampGMT),
         endTime: new Date(dto.sleepEndTimestampGMT),
@@ -513,12 +515,15 @@ export class GarminConnectClient {
         else highMinutes += minutes
       }
 
-      if (!samples.length && data.avgStressLevel == null && data.maxStressLevel == null) return undefined
+      const average = typeof data.avgStressLevel === 'number' && data.avgStressLevel >= 0 && data.avgStressLevel <= 100 ? data.avgStressLevel : undefined
+      const maximum = typeof data.maxStressLevel === 'number' && data.maxStressLevel >= 0 && data.maxStressLevel <= 100 ? data.maxStressLevel : undefined
+      if (!samples.length && average == null && maximum == null) return undefined
 
       return {
         date,
-        avgStressLevel: data.avgStressLevel ?? (samples.length ? samples.reduce((sum, sample) => sum + sample.stressLevel, 0) / samples.length : undefined),
-        maxStressLevel: data.maxStressLevel ?? (samples.length ? Math.max(...samples.map(sample => sample.stressLevel)) : undefined),
+        details: data,
+        avgStressLevel: average ?? (samples.length ? samples.reduce((sum, sample) => sum + sample.stressLevel, 0) / samples.length : undefined),
+        maxStressLevel: maximum ?? (samples.length ? Math.max(...samples.map(sample => sample.stressLevel)) : undefined),
         restStressDuration: restMinutes,
         lowStressDuration: lowMinutes,
         mediumStressDuration: mediumMinutes,
@@ -613,6 +618,7 @@ export class GarminConnectClient {
         date,
         id: String(entry.samplePk),
         ...(Number.isFinite(entry.timestampGMT) ? { timestamp: new Date(entry.timestampGMT) } : {}),
+        details: entry,
         weight: entry.weight,
         bmi: entry.bmi,
         bodyFatPercentage: entry.bodyFatPercentage,
