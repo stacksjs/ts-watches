@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.7...v0.1.8)
+
+## 🐛 Bug Fixes
+
+- read measured Garmin battery levels and daily step details ([2eb2a22](https://github.com/stacksjs/ts-watches/commit/2eb2a22)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.8 ([6d2ab5d](https://github.com/stacksjs/ts-watches/commit/6d2ab5d)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.6...v0.1.7)
 
 ## 🐛 Bug Fixes
