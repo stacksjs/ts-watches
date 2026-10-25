@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.9...v0.1.10)
+
+## 🐛 Bug Fixes
+
+- accept Garmin HRV days without readings ([41e2319](https://github.com/stacksjs/ts-watches/commit/41e2319)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.10 ([4a4b616](https://github.com/stacksjs/ts-watches/commit/4a4b616)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.8...v0.1.9)
 
 ## 🐛 Bug Fixes
