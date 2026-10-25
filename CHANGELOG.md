@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.6...v0.1.7)
+
+## 🐛 Bug Fixes
+
+- preserve complete Garmin wellness readings and sync failures ([0dd85f4](https://github.com/stacksjs/ts-watches/commit/0dd85f4)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.7 ([20ee7a3](https://github.com/stacksjs/ts-watches/commit/20ee7a3)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.5...v0.1.6)
 
 ## 🧹 Chores
