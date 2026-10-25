@@ -1,3 +1,13 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.5...v0.1.6)
+
+## 🧹 Chores
+
+- release v0.1.6 ([2454016](https://github.com/stacksjs/ts-watches/commit/2454016)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.4...v0.1.5)
 
 ## 🚀 Features

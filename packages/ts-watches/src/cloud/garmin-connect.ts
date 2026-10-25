@@ -43,6 +43,11 @@ export interface GarminActivitySummary {
   normPower?: number
   trainingStressScore?: number
   intensityFactor?: number
+  aerobicTrainingEffect?: number
+  anaerobicTrainingEffect?: number
+  trainingEffectLabel?: string
+  activityTrainingLoad?: number
+  vO2MaxValue?: number
 }
 
 export interface DailyHeartRate {
@@ -208,6 +213,36 @@ export class GarminConnectClient {
     this.ensureLoggedIn()
     const activities = await this.client.getActivities(start, limit)
     return activities as unknown as GarminActivitySummary[]
+  }
+
+  /** Provider snapshots for the signed-in account only; dates are calendar days. */
+  async getTrainingReadiness(date: string): Promise<unknown> {
+    return this.trainingMetric('trainingreadiness', date)
+  }
+
+  /** Aggregated status includes the primary device's acute load and VO2 max. */
+  async getTrainingStatus(date: string): Promise<unknown> {
+    return this.trainingMetric('trainingstatus/aggregated', date)
+  }
+
+  /** Daily VO2 max history; no estimates are calculated by this client. */
+  async getMaxMetrics(start: string, end: string): Promise<unknown> {
+    this.ensureLoggedIn()
+    this.metricDay(start)
+    this.metricDay(end)
+    if (start > end) throw new RangeError('Start date must precede end date')
+    return this.client.get(`https://connectapi.garmin.com/metrics-service/metrics/maxmet/daily/${start}/${end}`)
+  }
+
+  private metricDay(date: string): void {
+    if (!YMD.test(date) || new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date)
+      throw new RangeError('Expected a valid calendar date')
+  }
+
+  private async trainingMetric(metric: 'trainingreadiness' | 'trainingstatus/aggregated', date: string): Promise<unknown> {
+    this.ensureLoggedIn()
+    this.metricDay(date)
+    return this.client.get(`https://connectapi.garmin.com/metrics-service/metrics/${metric}/${date}`)
   }
 
   async getActivity(activityId: number): Promise<Activity> {
