@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.8...v0.1.9)
+
+## 🐛 Bug Fixes
+
+- retain original wellness fields and reject absent Garmin days ([f353139](https://github.com/stacksjs/ts-watches/commit/f353139)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.9 ([53512de](https://github.com/stacksjs/ts-watches/commit/53512de)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.7...v0.1.8)
 
 ## 🐛 Bug Fixes
