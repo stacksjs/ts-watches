@@ -221,8 +221,8 @@ export interface SleepData {
 
 export interface StressData {
   date: Date
-  avgStressLevel: number // 0-100
-  maxStressLevel: number
+  avgStressLevel?: number // 0-100
+  maxStressLevel?: number
   restStressDuration: number // minutes
   lowStressDuration: number // minutes
   mediumStressDuration: number // minutes
@@ -235,10 +235,10 @@ export interface StressData {
 
 export interface BodyBattery {
   date: Date
-  startLevel: number
-  endLevel: number
-  chargedValue: number
-  drainedValue: number
+  startLevel?: number
+  endLevel?: number
+  chargedValue?: number
+  drainedValue?: number
   samples: Array<{
     timestamp: Date
     level: number
@@ -291,6 +291,9 @@ export interface HRVData {
 
 export interface WeightData {
   date: Date
+  /** Stable provider observation id and measured UTC time, when supplied. */
+  id?: string
+  timestamp?: Date
   weight: number // grams
   bmi?: number
   bodyFatPercentage?: number

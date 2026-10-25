@@ -234,6 +234,13 @@ export class GarminConnectClient {
     return this.client.get(`https://connectapi.garmin.com/metrics-service/metrics/maxmet/daily/${start}/${end}`)
   }
 
+  /** Daily water intake in its original millilitres, including a genuine zero. */
+  async getHydrationData(date: string): Promise<unknown> {
+    this.ensureLoggedIn()
+    this.metricDay(date)
+    return this.client.get(`https://connectapi.garmin.com/usersummary-service/usersummary/hydration/allData/${date}`)
+  }
+
   private metricDay(date: string): void {
     if (!YMD.test(date) || new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date)
       throw new RangeError('Expected a valid calendar date')
@@ -417,8 +424,9 @@ export class GarminConnectClient {
         samples,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
@@ -452,8 +460,9 @@ export class GarminConnectClient {
         avgRespirationRate: dto.averageRespirationValue,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
@@ -470,8 +479,9 @@ export class GarminConnectClient {
         calories: 0,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
@@ -495,19 +505,23 @@ export class GarminConnectClient {
       let lowMinutes = 0
       let mediumMinutes = 0
       let highMinutes = 0
-      const intervalMinutes = samples.length > 1 ? 3 : 0 // Garmin samples every ~3 min
-
-      for (const s of samples) {
-        if (s.stressLevel <= 25) restMinutes += intervalMinutes
-        else if (s.stressLevel <= 50) lowMinutes += intervalMinutes
-        else if (s.stressLevel <= 75) mediumMinutes += intervalMinutes
-        else highMinutes += intervalMinutes
+      for (let i = 0; i + 1 < samples.length; i++) {
+        const s = samples[i]!
+        const minutes = (samples[i + 1]!.timestamp.getTime() - s.timestamp.getTime()) / 60_000
+        // Missing radio readings are gaps, not minutes spent in the last zone.
+        if (!(minutes > 0 && minutes <= 5)) continue
+        if (s.stressLevel <= 25) restMinutes += minutes
+        else if (s.stressLevel <= 50) lowMinutes += minutes
+        else if (s.stressLevel <= 75) mediumMinutes += minutes
+        else highMinutes += minutes
       }
+
+      if (!samples.length && data.avgStressLevel == null && data.maxStressLevel == null) return undefined
 
       return {
         date,
-        avgStressLevel: data.avgStressLevel ?? 0,
-        maxStressLevel: data.maxStressLevel ?? 0,
+        avgStressLevel: data.avgStressLevel ?? (samples.length ? samples.reduce((sum, sample) => sum + sample.stressLevel, 0) / samples.length : undefined),
+        maxStressLevel: data.maxStressLevel ?? (samples.length ? Math.max(...samples.map(sample => sample.stressLevel)) : undefined),
         restStressDuration: restMinutes,
         lowStressDuration: lowMinutes,
         mediumStressDuration: mediumMinutes,
@@ -515,8 +529,9 @@ export class GarminConnectClient {
         samples,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
@@ -536,20 +551,22 @@ export class GarminConnectClient {
         }))
 
       const levels = samples.map(s => s.level)
-      const startLevel = levels[0] ?? 0
-      const endLevel = levels[levels.length - 1] ?? 0
+      const startLevel = levels[0]
+      const endLevel = levels[levels.length - 1]
+      if (!levels.length && data.charged == null && data.drained == null) return undefined
 
       return {
         date,
         startLevel,
         endLevel,
-        chargedValue: data.charged ?? 0,
-        drainedValue: data.drained ?? 0,
+        chargedValue: data.charged,
+        drainedValue: data.drained,
         samples,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
@@ -576,23 +593,26 @@ export class GarminConnectClient {
         samples,
       }
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return undefined
+      throw error
     }
   }
 
   async getWeightData(date: Date): Promise<WeightData | undefined> {
+    return (await this.getWeightReadings(date))[0]
+  }
+
+  /** Every weigh-in on the signed-in account's day, not just the first entry. */
+  async getWeightReadings(date: Date): Promise<WeightData[]> {
     this.ensureLoggedIn()
 
     try {
       const data = await this.client.getDailyWeightData(date)
-      if (!data?.dateWeightList?.length)
-        return undefined
-
-      const entry = data.dateWeightList[0]
-
-      return {
+      return (data?.dateWeightList || []).map(entry => ({
         date,
+        id: String(entry.samplePk),
+        ...(Number.isFinite(entry.timestampGMT) ? { timestamp: new Date(entry.timestampGMT) } : {}),
         weight: entry.weight,
         bmi: entry.bmi,
         bodyFatPercentage: entry.bodyFatPercentage,
@@ -601,10 +621,11 @@ export class GarminConnectClient {
         muscleMass: entry.muscleMass,
         visceralFat: entry.visceralFat,
         metabolicAge: entry.metabolicAge,
-      }
+      }))
     }
-    catch {
-      return undefined
+    catch (error) {
+      if (isGarminNotFound(error)) return []
+      throw error
     }
   }
 
