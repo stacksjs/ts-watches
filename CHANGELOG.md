@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.10...v0.1.11)
+
+## 🐛 Bug Fixes
+
+- keep Bluetooth package usable in native hosts ([3d169e2](https://github.com/stacksjs/ts-watches/commit/3d169e2)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.11 ([d61d340](https://github.com/stacksjs/ts-watches/commit/d61d340)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.9...v0.1.10)
 
 ## 🐛 Bug Fixes
