@@ -10,6 +10,7 @@ export function decodeGarminHealthFile(bytes: Uint8Array, timezone: string): Gar
   const messages = readStrictFit(bytes)
   const days = new Map<string, GarminHealthDay>()
   const heartRate: GarminHealthFile['heartRate'] = []
+  const stepCounters = new Map<string, Map<number, number>>()
   const stress = new Map<string, number[]>()
   const spo2 = new Map<string, number[]>()
   const respiration = new Map<string, number[]>()
@@ -33,7 +34,13 @@ export function decodeGarminHealthFile(bytes: Uint8Array, timezone: string): Gar
     if (message.number === 55) {
       // cycles is cumulative, with a walking/running steps subfield. Never sum snapshots.
       const cycles = n(3)
-      if (cycles !== null && [1, 6].includes(n(5) ?? -1)) day.steps = Math.max(day.steps ?? 0, cycles)
+      const activity = n(5)
+      if (cycles !== null && activity !== null && [1, 6].includes(activity)) {
+        const counters = stepCounters.get(key) ?? new Map<number, number>()
+        counters.set(activity, Math.max(counters.get(activity) ?? 0, cycles))
+        stepCounters.set(key, counters)
+        day.steps = [...counters.values()].reduce((sum, value) => sum + value, 0)
+      }
       const calories = n(19)
       if (calories !== null) day.active_calories = Math.max(day.active_calories ?? 0, calories)
     }

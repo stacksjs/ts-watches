@@ -59,3 +59,11 @@ test('file checkpoints distinguish growing daily files and tolerate reordered in
   const entry = { dataType: 128, subType: 32, number: 2, size: 100, timestamp: 1000 }
   expect(garminFileIdentity(entry)).not.toBe(garminFileIdentity({ ...entry, size: 101 }))
 })
+
+test('monitoring steps combine activity counters without summing repeated snapshots', () => {
+  const time = Math.floor(Date.UTC(2026, 9, 25, 12) / 1000) - 631065600
+  const records = [0x40, 0, 0, 55, 0, 3, 253, 4, 134, 3, 4, 134, 5, 1, 0]
+  for (const [offset, steps, activity] of [[0, 1000, 6], [1, 200, 1], [2, 1200, 6]])
+    records.push(0, ...u32(time + offset), ...u32(steps), activity)
+  expect(decodeGarminHealthFile(fit(records), 'UTC').days).toEqual([{ date: '2026-10-25', steps: 1400 }])
+})
