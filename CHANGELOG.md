@@ -1,3 +1,21 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.17...v0.1.18)
+
+## 🐛 Bug Fixes
+
+- retain exact Garmin zone timer duration ([60834ba](https://github.com/stacksjs/ts-watches/commit/60834ba)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧪 Tests
+
+- type Garmin fetch mocks for Bun ([7f84685](https://github.com/stacksjs/ts-watches/commit/7f84685)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.18 ([4958fe4](https://github.com/stacksjs/ts-watches/commit/4958fe4)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.16...v0.1.17)
 
 ## 🚀 Features
