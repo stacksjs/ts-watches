@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.13...v0.1.14)
+
+## 🐛 Bug Fixes
+
+- use documented Garmin negotiation and sequence handling ([6ef6458](https://github.com/stacksjs/ts-watches/commit/6ef6458)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.14 ([05b766a](https://github.com/stacksjs/ts-watches/commit/05b766a)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.12...v0.1.13)
 
 ## 🐛 Bug Fixes
