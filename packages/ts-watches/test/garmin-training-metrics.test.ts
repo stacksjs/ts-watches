@@ -52,3 +52,16 @@ test('a missing zone report is empty, while authorization and provider failures 
     await expect(client.getActivityHeartRateTimeInZones(42)).rejects.toThrow()
   }
 })
+
+test('a recorded report uses the original timer duration rather than rounded or elapsed time', async () => {
+  globalThis.fetch = (async (url: any) => String(url).endsWith('/42')
+    ? Response.json({ summaryDTO: { duration: 1946.916, elapsedDuration: 3500.993 } })
+    : Response.json([{ zoneNumber: 1, secsInZone: 277.482, zoneLowBoundary: 93 }])) as typeof fetch
+  const client = new GarminConnectClient({ username: 'athlete@example.com', password: 'test' })
+  ;(client as unknown as { isLoggedIn: boolean }).isLoggedIn = true
+  const report = await client.getActivityTimeInZones(42)
+  expect(report.duration).toBe(1946.916)
+  expect(report.heartRate[0]!.seconds).toBe(277.482)
+  expect(report.power[0]!.seconds).toBe(277.482)
+  await expect(client.getActivityTimeInZones(0)).rejects.toThrow()
+})

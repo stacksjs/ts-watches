@@ -6,6 +6,7 @@ export {
   parseActivityDetails,
   parseActivityZoneTimes,
   type ActivityZoneTime,
+  type ActivityZoneReport,
   type ActivityDetailSample,
   type DailyHeartRate,
   type DailySummary,

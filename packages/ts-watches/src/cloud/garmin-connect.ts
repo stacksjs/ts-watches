@@ -92,6 +92,12 @@ export interface ActivityZoneTime {
   low: number
 }
 
+export interface ActivityZoneReport {
+  duration: number
+  heartRate: ActivityZoneTime[]
+  power: ActivityZoneTime[]
+}
+
 /** Validate the complete provider report; never silently keep only some zones. */
 export function parseActivityZoneTimes(value: unknown): ActivityZoneTime[] {
   if (!Array.isArray(value)) throw new TypeError('Garmin zone times must be an array')
@@ -298,6 +304,21 @@ export class GarminConnectClient {
   async getActivityDetails(activityId: number, maxSamples = 2000): Promise<ActivityDetailSample[]> {
     this.ensureLoggedIn()
     return parseActivityDetails(await this.client.getActivityDetails({ activityId }, maxSamples))
+  }
+
+  /** Original timer duration and zone reports, including sub-second precision. */
+  async getActivityTimeInZones(activityId: number): Promise<ActivityZoneReport> {
+    this.ensureLoggedIn()
+    if (!Number.isSafeInteger(activityId) || activityId <= 0) throw new RangeError('A valid activity ID is required')
+    const [activity, heartRate, power] = await Promise.all([
+      this.client.getActivity({ activityId }),
+      this.getActivityHeartRateTimeInZones(activityId),
+      this.getActivityPowerTimeInZones(activityId),
+    ])
+    const row = activity as unknown as { summaryDTO?: { duration?: unknown }, duration?: unknown }
+    const duration = row.summaryDTO?.duration ?? row.duration
+    if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 0) throw new TypeError('Invalid Garmin activity timer duration')
+    return { duration, heartRate, power }
   }
 
   /** Garmin's recorded HR zones, independent of today's profile thresholds. */
