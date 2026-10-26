@@ -45,10 +45,10 @@ test('recorded zones use activity-scoped endpoints and retain device times', asy
 test('a missing zone report is empty, while authorization and provider failures remain failures', async () => {
   const client = new GarminConnectClient({ username: 'athlete@example.com', password: 'test' })
   ;(client as unknown as { isLoggedIn: boolean }).isLoggedIn = true
-  globalThis.fetch = (async () => Response.json({}, { status: 404 })) as typeof fetch
+  globalThis.fetch = (async () => Response.json({}, { status: 404 })) as unknown as typeof fetch
   expect(await client.getActivityHeartRateTimeInZones(42)).toEqual([])
   for (const status of [401, 429, 503]) {
-    globalThis.fetch = (async () => Response.json({}, { status })) as typeof fetch
+    globalThis.fetch = (async () => Response.json({}, { status })) as unknown as typeof fetch
     await expect(client.getActivityHeartRateTimeInZones(42)).rejects.toThrow()
   }
 })
