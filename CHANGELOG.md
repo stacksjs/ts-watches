@@ -1,3 +1,21 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.15...v0.1.16)
+
+## 🐛 Bug Fixes
+
+- normalize Garmin activity detail speed units ([f520c07](https://github.com/stacksjs/ts-watches/commit/f520c07)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 📚 Documentation
+
+- explain direct Garmin Bluetooth imports and limits ([c95eece](https://github.com/stacksjs/ts-watches/commit/c95eece)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.16 ([fde5067](https://github.com/stacksjs/ts-watches/commit/fde5067)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.14...v0.1.15)
 
 ## 🐛 Bug Fixes
