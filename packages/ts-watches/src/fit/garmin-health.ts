@@ -4,6 +4,7 @@ export interface GarminHealthFile { fileType: number | null, deviceId: string | 
 /** Public FIT field layouts, independently encoded from Garmin's FIT profile.
  * Unknown/private fields remain in the retained raw FIT file for later decoding.
  * Live RR intervals and FIT HRV beat intervals are never treated as nightly HRV. */
+// eslint-disable-next-line pickier/no-unused-vars -- Both inputs are read below; nested callback analysis misses them.
 export function decodeGarminHealthFile(bytes: Uint8Array, timezone: string): GarminHealthFile {
   const date = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' })
   const messages = readStrictFit(bytes)

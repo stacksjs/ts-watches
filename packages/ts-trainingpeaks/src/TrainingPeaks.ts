@@ -13,7 +13,6 @@ import type {
   TPAthleteGroup,
   TPWorkout,
   TPMetrics,
-  TPCalendarDay,
   TPPerformanceChart,
   TPUploadResult,
   TPSearchParams,

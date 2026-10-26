@@ -1,4 +1,4 @@
-import type { Activity, ActivityRecord, GeoPosition } from '../types'
+import type { Activity, ActivityRecord } from '../types'
 
 export interface GeoJsonFeature {
   type: 'Feature'

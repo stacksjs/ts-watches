@@ -3,16 +3,9 @@ import type {
   ActivityLap,
   ActivityRecord,
   MonitoringData,
-  DailyHeartRate,
-  SleepData,
   SleepStage,
-  StressData,
-  SpO2Data,
-  RespirationData,
-  HRVData,
   SportType,
   SubSportType,
-  GeoPosition,
 } from '../types'
 import type { FitMessage, FitParseResult } from './parser'
 import { fitTimestampToDate, semicirclesToDegrees } from './parser'

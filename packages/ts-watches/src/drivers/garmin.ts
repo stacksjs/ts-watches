@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, statSync, mkdirSync, copyFileSync, readFileSync } from 'fs'
-import { join, basename, extname } from 'path'
+import { join, extname } from 'path'
 import { homedir } from 'os'
 import type {
   WatchDriver,

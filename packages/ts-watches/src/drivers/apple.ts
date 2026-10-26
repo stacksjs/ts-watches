@@ -6,11 +6,6 @@ import type {
   DownloadResult,
   Activity,
   MonitoringData,
-  ActivityRecord,
-  ActivityLap,
-  SleepData,
-  DailyHeartRate,
-  DailySteps,
 } from '../types'
 
 export interface AppleDevice extends WatchDevice {
