@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.11...v0.1.12)
+
+## 🚀 Features
+
+- add direct Garmin Bluetooth health sync with Zig codec ([a83d46d](https://github.com/stacksjs/ts-watches/commit/a83d46d)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.12 ([f3d9a8c](https://github.com/stacksjs/ts-watches/commit/f3d9a8c)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.10...v0.1.11)
 
 ## 🐛 Bug Fixes
