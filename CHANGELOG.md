@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.14...v0.1.15)
+
+## 🐛 Bug Fixes
+
+- combine Garmin walking and running step counters ([8504ed7](https://github.com/stacksjs/ts-watches/commit/8504ed7)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.15 ([62fb882](https://github.com/stacksjs/ts-watches/commit/62fb882)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.13...v0.1.14)
 
 ## 🐛 Bug Fixes
