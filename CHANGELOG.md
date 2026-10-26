@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.16...v0.1.17)
+
+## 🚀 Features
+
+- read Garmin recorded activity zone times ([5c72fc1](https://github.com/stacksjs/ts-watches/commit/5c72fc1)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.17 ([999492a](https://github.com/stacksjs/ts-watches/commit/999492a)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.15...v0.1.16)
 
 ## 🐛 Bug Fixes
