@@ -96,6 +96,6 @@
   "dependencies": {
     "ts-garmin": "workspace:*",
     "ts-trainingpeaks": "workspace:*",
-    "@zig-utils/garmin": "https://github.com/zig-utils/zig-garmin/releases/download/v0.1.0/zig-utils-garmin-0.1.0.tgz"
+    "@zig-utils/garmin": "https://github.com/zig-utils/zig-garmin/releases/download/v0.1.2/zig-utils-garmin-0.1.2.tgz"
   }
 }

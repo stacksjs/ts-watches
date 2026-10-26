@@ -14,7 +14,7 @@
     },
     "packages/ts-garmin": {
       "name": "ts-garmin",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "devDependencies": {
         "@types/bun": "latest",
         "bun-plugin-dtsx": "^0.9.14",
@@ -22,7 +22,7 @@
     },
     "packages/ts-trainingpeaks": {
       "name": "ts-trainingpeaks",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "devDependencies": {
         "@types/bun": "latest",
         "typescript": "^7.0.2",
@@ -30,12 +30,12 @@
     },
     "packages/ts-watches": {
       "name": "ts-watches",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "bin": {
         "watch": "./dist/bin/cli.js",
       },
       "dependencies": {
-        "@zig-utils/garmin": "https://github.com/zig-utils/zig-garmin/releases/download/v0.1.0/zig-utils-garmin-0.1.0.tgz",
+        "@zig-utils/garmin": "https://github.com/zig-utils/zig-garmin/releases/download/v0.1.2/zig-utils-garmin-0.1.2.tgz",
         "ts-garmin": "workspace:*",
         "ts-trainingpeaks": "workspace:*",
       },
@@ -146,7 +146,7 @@
 
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
 
-    "@zig-utils/garmin": ["@zig-utils/garmin@https://github.com/zig-utils/zig-garmin/releases/download/v0.1.0/zig-utils-garmin-0.1.0.tgz", {}, "sha512-iKlBMZRsYOYorYritDUrleli+hesBOFBmcg4EXiLL3cBcXxdTs7bUgElW1XrDCzW3yUXhkO9qCAzohaXAAdggg=="],
+    "@zig-utils/garmin": ["@zig-utils/garmin@https://github.com/zig-utils/zig-garmin/releases/download/v0.1.2/zig-utils-garmin-0.1.2.tgz", {}, "sha512-iTCGmGikZ31VdauKHHmuN0E3L2PPlJ69Uqt8G8Q2N00+cqgVTIOoobyG0VdP/J5dxjrar/BPDQmQdr4PUotKPA=="],
 
     "abort-controller": ["abort-controller@3.0.0", "", { "dependencies": { "event-target-shim": "^5.0.0" } }, "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="],
 
