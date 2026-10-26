@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.18...v0.1.19)
+
+## 🐛 Bug Fixes
+
+- normalize Garmin biometric threshold speed ([a4d8bf9](https://github.com/stacksjs/ts-watches/commit/a4d8bf9)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.19 ([20ebba5](https://github.com/stacksjs/ts-watches/commit/20ebba5)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.17...v0.1.18)
 
 ## 🐛 Bug Fixes
