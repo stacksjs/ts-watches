@@ -69,6 +69,44 @@ A comprehensive TypeScript library for downloading, parsing, and analyzing data 
 - **TypeScript** - Fully typed APIs with comprehensive type exports
 - **Zero Dependencies** - Core FIT parser has no external dependencies
 
+
+## Direct Garmin Bluetooth
+
+`ts-watches/garmin-bluetooth` connects to a user-selected watch through Craft's
+native Bluetooth notification stream. Check `garminBluetoothAvailable(bluetooth)`
+first; an older native host cannot provide the lossless reads and writes it needs.
+The initial hardware target is Garmin Enduro 3. Hardware compatibility remains
+experimental and is not equivalent to all Garmin Connect health data.
+
+```ts
+import { connectGarminBluetooth, garminFileIdentity } from 'ts-watches/garmin-bluetooth'
+import { decodeGarminHealthFile } from 'ts-watches/fit'
+
+// bluetooth is the native Craft host; selectedId comes from explicit scanning/pairing.
+const client = await connectGarminBluetooth(bluetooth, selectedId)
+try {
+  await client.sync({
+    seen: entry => savedFiles.has(garminFileIdentity(entry)),
+    async onFile(file) {
+      // Persist the complete verified file before acknowledging this callback.
+      await saveOriginal(file)
+      const health = decodeGarminHealthFile(file.bytes, athleteTimeZone)
+      await importHealth(health)
+    },
+  })
+}
+finally {
+  await client.close()
+}
+```
+
+Downloads are read-only and bounded. Unknown FIT fields remain available in the
+original bytes; live RR intervals are never represented as nightly HRV. Keep a
+separate Garmin Connect connection for reconciliation and unavailable data. The
+protocol implementation is first-party [zig-garmin](https://github.com/zig-utils/zig-garmin),
+which credits garmin-ble and Gadgetbridge in its provenance notice. It uses no
+Garmin SDK or third-party Bluetooth runtime dependency.
+
 ## Install
 
 ```bash
