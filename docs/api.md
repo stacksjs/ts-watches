@@ -430,6 +430,8 @@ class GarminConnectClient {
   getActivities(since?: Date, limit?: number): Promise<GarminActivity[]>
   getActivity(activityId: string): Promise<GarminActivity>
   getActivityDetails(activityId: number, maxSamples?: number): Promise<ActivityDetailSample[]>
+  getActivityHeartRateTimeInZones(activityId: number): Promise<ActivityZoneTime[]>
+  getActivityPowerTimeInZones(activityId: number): Promise<ActivityZoneTime[]>
   // The original recording in memory; `zip` is Connect's "Export Original"
   downloadOriginalActivity(activityId: number, format?: 'zip' | 'tcx' | 'gpx' | 'kml'): Promise<OriginalActivityFile>
   // The same zip written to `{outputDir}/{activityId}.zip`; returns that path

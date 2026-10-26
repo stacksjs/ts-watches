@@ -4,6 +4,8 @@ export {
   GarminConnectClient,
   isGarminNotFound,
   parseActivityDetails,
+  parseActivityZoneTimes,
+  type ActivityZoneTime,
   type ActivityDetailSample,
   type DailyHeartRate,
   type DailySummary,

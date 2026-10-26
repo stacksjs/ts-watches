@@ -85,6 +85,29 @@ export interface ActivityDetailSample {
   speed: number | null
 }
 
+/** Device-recorded zone membership, including its original lower boundary. */
+export interface ActivityZoneTime {
+  zone: number
+  seconds: number
+  low: number
+}
+
+/** Validate the complete provider report; never silently keep only some zones. */
+export function parseActivityZoneTimes(value: unknown): ActivityZoneTime[] {
+  if (!Array.isArray(value)) throw new TypeError('Garmin zone times must be an array')
+  if (value.length > 7) throw new TypeError('Garmin zone times have too many zones')
+  const rows = value.map((row) => {
+    if (!row || !Number.isInteger(row.zoneNumber) || row.zoneNumber < 1 || row.zoneNumber > 7
+      || typeof row.secsInZone !== 'number' || !Number.isFinite(row.secsInZone) || row.secsInZone < 0
+      || typeof row.zoneLowBoundary !== 'number' || !Number.isFinite(row.zoneLowBoundary) || row.zoneLowBoundary < 0)
+      throw new TypeError('Invalid Garmin zone time')
+    return { zone: row.zoneNumber, seconds: row.secsInZone, low: row.zoneLowBoundary }
+  }).sort((a, b) => a.zone - b.zone)
+  if (rows.some((row, i) => row.zone !== i + 1 || (i > 0 && row.low <= rows[i - 1]!.low)))
+    throw new TypeError('Garmin zone boundaries must be ordered and consecutive')
+  return rows
+}
+
 /**
  * Garmin Connect's activity details as plain samples. The endpoint sends one
  * array of values per sample, in the order `metricDescriptors` gives; timer
@@ -275,6 +298,28 @@ export class GarminConnectClient {
   async getActivityDetails(activityId: number, maxSamples = 2000): Promise<ActivityDetailSample[]> {
     this.ensureLoggedIn()
     return parseActivityDetails(await this.client.getActivityDetails({ activityId }, maxSamples))
+  }
+
+  /** Garmin's recorded HR zones, independent of today's profile thresholds. */
+  async getActivityHeartRateTimeInZones(activityId: number): Promise<ActivityZoneTime[]> {
+    return this.activityZoneTimes(activityId, 'hrTimeInZones')
+  }
+
+  /** Garmin's recorded power zones; unavailable recordings return an empty list. */
+  async getActivityPowerTimeInZones(activityId: number): Promise<ActivityZoneTime[]> {
+    return this.activityZoneTimes(activityId, 'powerTimeInZones')
+  }
+
+  private async activityZoneTimes(activityId: number, metric: 'hrTimeInZones' | 'powerTimeInZones'): Promise<ActivityZoneTime[]> {
+    this.ensureLoggedIn()
+    if (!Number.isSafeInteger(activityId) || activityId <= 0) throw new RangeError('A valid activity ID is required')
+    try {
+      return parseActivityZoneTimes(await this.client.get(`https://connectapi.garmin.com/activity-service/activity/${activityId}/${metric}`))
+    }
+    catch (error) {
+      if (isGarminNotFound(error)) return []
+      throw error
+    }
   }
 
   /**

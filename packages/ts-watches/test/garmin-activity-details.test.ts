@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { parseActivityDetails } from '../src/cloud/garmin-connect'
+import { parseActivityDetails, parseActivityZoneTimes } from '../src/cloud/garmin-connect'
 
 const descriptors = [
   { metricsIndex: 0, key: 'directTimestamp' },
@@ -64,5 +64,22 @@ describe('parseActivityDetails', () => {
     expect(samples).toEqual([{ seconds: 0, heartRate: null, power: null, speed: null }])
     expect(parseActivityDetails(null)).toEqual([])
     expect(parseActivityDetails({ metricDescriptors: 'x', activityDetailMetrics: {} })).toEqual([])
+  })
+})
+
+describe('parseActivityZoneTimes', () => {
+  it('preserves recorded boundaries, zero zones and fractional durations', () => {
+    expect(parseActivityZoneTimes([
+      { zoneNumber: 2, secsInZone: 802.798, zoneLowBoundary: 112 },
+      { zoneNumber: 1, secsInZone: 277.482, zoneLowBoundary: 93 },
+      { zoneNumber: 3, secsInZone: 0, zoneLowBoundary: 130 },
+    ])).toEqual([{ zone: 1, seconds: 277.482, low: 93 }, { zone: 2, seconds: 802.798, low: 112 }, { zone: 3, seconds: 0, low: 130 }])
+    expect(parseActivityZoneTimes([])).toEqual([])
+  })
+
+  it('rejects incomplete, duplicated, unordered and invalid reports', () => {
+    const row = { zoneNumber: 1, secsInZone: 5, zoneLowBoundary: 90 }
+    for (const value of [null, {}, [row, row], [{ ...row, zoneNumber: 2 }], [{ ...row, secsInZone: -1 }], [{ ...row, secsInZone: Number.NaN }], [{ ...row, zoneLowBoundary: Infinity }], [row, { ...row, zoneNumber: 2, zoneLowBoundary: 80 }]])
+      expect(() => parseActivityZoneTimes(value)).toThrow()
   })
 })

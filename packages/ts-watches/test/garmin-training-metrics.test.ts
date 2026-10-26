@@ -27,3 +27,28 @@ test('training metrics use fixed account endpoints and preserve provider snapsho
   expect(seen).toHaveLength(3)
   await expect(new GarminConnectClient().getTrainingStatus('2026-10-24')).rejects.toThrow()
 })
+
+test('recorded zones use activity-scoped endpoints and retain device times', async () => {
+  const seen: string[] = []
+  globalThis.fetch = (async (url: any) => {
+    seen.push(String(url))
+    return Response.json([{ zoneNumber: 1, secsInZone: 277.482, zoneLowBoundary: 93 }])
+  }) as typeof fetch
+  const client = new GarminConnectClient({ username: 'athlete@example.com', password: 'test' })
+  ;(client as unknown as { isLoggedIn: boolean }).isLoggedIn = true
+  expect(await client.getActivityHeartRateTimeInZones(42)).toEqual([{ zone: 1, seconds: 277.482, low: 93 }])
+  await client.getActivityPowerTimeInZones(42)
+  for (const id of [0, -1, Number.NaN, 4.5]) await expect(client.getActivityHeartRateTimeInZones(id)).rejects.toThrow()
+  expect(seen).toEqual(['https://connectapi.garmin.com/activity-service/activity/42/hrTimeInZones', 'https://connectapi.garmin.com/activity-service/activity/42/powerTimeInZones'])
+})
+
+test('a missing zone report is empty, while authorization and provider failures remain failures', async () => {
+  const client = new GarminConnectClient({ username: 'athlete@example.com', password: 'test' })
+  ;(client as unknown as { isLoggedIn: boolean }).isLoggedIn = true
+  globalThis.fetch = (async () => Response.json({}, { status: 404 })) as typeof fetch
+  expect(await client.getActivityHeartRateTimeInZones(42)).toEqual([])
+  for (const status of [401, 429, 503]) {
+    globalThis.fetch = (async () => Response.json({}, { status })) as typeof fetch
+    await expect(client.getActivityHeartRateTimeInZones(42)).rejects.toThrow()
+  }
+})
