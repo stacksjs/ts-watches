@@ -672,3 +672,5 @@ const FIELD_DEF = {
 ### Garmin running lactate threshold
 
 `client.getLatestLactateThreshold()` returns the latest running speed and heart-rate measurements, each with its original `calendarDate`. Speed includes `metersPerSecond` and `secondsPerKilometer`. Connect’s biometric endpoint stores speed in units of 10 m/s: a raw `0.37222118` becomes `3.7222118 m/s`, approximately `4:29/km`. Activity sample speed uses its own declared units. The parser never treats biometric speed as inverse pace or guesses a unit from its magnitude. Missing measurements are null.
+
+`client.getHeartRateThresholds()` returns configured `lthr`, `maxHeartRate` and `restingHeartRate` in bpm. Running-specific fields override the default profile, with missing fields inherited from the default. These are training settings, not daily observed extrema. `client.getCyclingFtp()` returns the configured cycling FTP in watts; running, rowing and skiing threshold power are kept separate. Missing/unsupported or invalid fields are null. Authentication, rate-limit, server and malformed-response errors remain failures so callers can retry without erasing saved thresholds.

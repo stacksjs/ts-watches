@@ -22,3 +22,4 @@ export * from './strava'
 export * from './trainingpeaks'
 
 export * from './garmin-lactate-threshold'
+export * from './garmin-profile-thresholds'

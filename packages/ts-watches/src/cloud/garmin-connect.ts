@@ -3,6 +3,8 @@ import { join } from 'node:path'
 import { GarminConnect } from 'ts-garmin'
 import { parseGarminLactateThreshold } from './garmin-lactate-threshold'
 import type { GarminLactateThreshold } from './garmin-lactate-threshold'
+import { parseGarminCyclingFtp, parseGarminHeartRateThresholds } from './garmin-profile-thresholds'
+import type { GarminHeartRateThresholds } from './garmin-profile-thresholds'
 import type { Activity, SleepData, StressData, BodyBattery, HRVData, WeightData } from '../types'
 
 export interface GarminConnectConfig {
@@ -269,6 +271,30 @@ export class GarminConnectClient {
   async getLatestLactateThreshold(): Promise<GarminLactateThreshold> {
     this.ensureLoggedIn()
     return parseGarminLactateThreshold(await this.client.get('https://connectapi.garmin.com/biometric-service/biometric/latestLactateThreshold'))
+  }
+
+  /** Current running/default HR profile settings, in bpm; not daily observed maxima. */
+  async getHeartRateThresholds(): Promise<GarminHeartRateThresholds> {
+    this.ensureLoggedIn()
+    try {
+      return parseGarminHeartRateThresholds(await this.client.get('https://connectapi.garmin.com/biometric-service/heartRateZones'))
+    }
+    catch (error) {
+      if (isGarminNotFound(error)) return { lthr: null, maxHeartRate: null, restingHeartRate: null }
+      throw error
+    }
+  }
+
+  /** Current cycling FTP profile setting in watts, distinct from running threshold power. */
+  async getCyclingFtp(): Promise<number | null> {
+    this.ensureLoggedIn()
+    try {
+      return parseGarminCyclingFtp(await this.client.get('https://connectapi.garmin.com/biometric-service/powerZones/sports/all'))
+    }
+    catch (error) {
+      if (isGarminNotFound(error)) return null
+      throw error
+    }
   }
 
   /** Daily VO2 max history; no estimates are calculated by this client. */
