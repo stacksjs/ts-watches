@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.19...v0.1.20)
+
+## 🚀 Features
+
+- expose Garmin heart rate thresholds and cycling FTP ([d17b6fb](https://github.com/stacksjs/ts-watches/commit/d17b6fb)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.20 ([e1441fd](https://github.com/stacksjs/ts-watches/commit/e1441fd)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.18...v0.1.19)
 
 ## 🐛 Bug Fixes
