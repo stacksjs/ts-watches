@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.12...v0.1.13)
+
+## 🐛 Bug Fixes
+
+- satisfy current lint checks for Garmin health release ([0fa8765](https://github.com/stacksjs/ts-watches/commit/0fa8765)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.13 ([8f17f73](https://github.com/stacksjs/ts-watches/commit/8f17f73)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.11...v0.1.12)
 
 ## 🚀 Features
