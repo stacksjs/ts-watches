@@ -20,3 +20,5 @@ export {
 } from './garmin-connect'
 export * from './strava'
 export * from './trainingpeaks'
+
+export * from './garmin-lactate-threshold'

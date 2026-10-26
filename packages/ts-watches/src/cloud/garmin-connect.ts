@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { GarminConnect } from 'ts-garmin'
+import { parseGarminLactateThreshold } from './garmin-lactate-threshold'
+import type { GarminLactateThreshold } from './garmin-lactate-threshold'
 import type { Activity, SleepData, StressData, BodyBattery, HRVData, WeightData } from '../types'
 
 export interface GarminConnectConfig {
@@ -261,6 +263,12 @@ export class GarminConnectClient {
   /** Aggregated status includes the primary device's acute load and VO2 max. */
   async getTrainingStatus(date: string): Promise<unknown> {
     return this.trainingMetric('trainingstatus/aggregated', date)
+  }
+
+  /** Latest measured running thresholds, with biometric speed normalized to m/s. */
+  async getLatestLactateThreshold(): Promise<GarminLactateThreshold> {
+    this.ensureLoggedIn()
+    return parseGarminLactateThreshold(await this.client.get('https://connectapi.garmin.com/biometric-service/biometric/latestLactateThreshold'))
   }
 
   /** Daily VO2 max history; no estimates are calculated by this client. */

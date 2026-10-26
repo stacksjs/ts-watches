@@ -668,3 +668,7 @@ const FIELD_DEF = {
   // ... many more
 }
 ```
+
+### Garmin running lactate threshold
+
+`client.getLatestLactateThreshold()` returns the latest running speed and heart-rate measurements, each with its original `calendarDate`. Speed includes `metersPerSecond` and `secondsPerKilometer`. Connect’s biometric endpoint stores speed in units of 10 m/s: a raw `0.37222118` becomes `3.7222118 m/s`, approximately `4:29/km`. Activity sample speed uses its own declared units. The parser never treats biometric speed as inverse pace or guesses a unit from its magnitude. Missing measurements are null.
