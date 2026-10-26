@@ -27,6 +27,26 @@ describe('parseActivityDetails', () => {
     ])
   })
 
+  it('normalizes declared speed units without applying the storage factor twice', () => {
+    for (const [key, raw, expected] of [['mps', 3, 3], ['kph', 10.8, 3], ['mph', 6.710809, 3]] as const) {
+      const [sample] = parseActivityDetails({
+        metricDescriptors: [{ metricsIndex: 0, key: 'sumDuration' }, { metricsIndex: 1, key: 'directSpeed', unit: { key, factor: 0.1 } }],
+        activityDetailMetrics: [{ metrics: [0, raw] }],
+      })
+      expect(sample!.speed!).toBeCloseTo(expected, 5)
+    }
+  })
+
+  it('keeps stopped speeds at zero and leaves an unknown unit unclassified', () => {
+    for (const [key, expected] of [['kph', 0], ['unknown', null]] as const) {
+      const [sample] = parseActivityDetails({
+        metricDescriptors: [{ metricsIndex: 0, key: 'sumDuration' }, { metricsIndex: 1, key: 'directSpeed', unit: { key } }],
+        activityDetailMetrics: [{ metrics: [0, 0] }],
+      })
+      expect(sample!.speed).toBe(expected)
+    }
+  })
+
   it('falls back to wall time, counting a gap over a minute as a pause', () => {
     const samples = parseActivityDetails({
       metricDescriptors: [{ metricsIndex: 0, key: 'directTimestamp' }, { metricsIndex: 1, key: 'directHeartRate' }],

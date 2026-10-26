@@ -93,7 +93,7 @@ export interface ActivityDetailSample {
  * pause. Samples with no time at all are dropped.
  */
 export function parseActivityDetails(details: unknown): ActivityDetailSample[] {
-  const data = details as { metricDescriptors?: Array<{ metricsIndex: number, key: string }>, activityDetailMetrics?: Array<{ metrics?: Array<number | null> }> } | null
+  const data = details as { metricDescriptors?: Array<{ metricsIndex: number, key: string, unit?: { key?: string } }>, activityDetailMetrics?: Array<{ metrics?: Array<number | null> }> } | null
   const descriptors = Array.isArray(data?.metricDescriptors) ? data!.metricDescriptors : []
   const rows = Array.isArray(data?.activityDetailMetrics) ? data!.activityDetailMetrics : []
   const index = (key: string) => descriptors.find(d => d.key === key)?.metricsIndex ?? -1
@@ -103,6 +103,14 @@ export function parseActivityDetails(details: unknown): ActivityDetailSample[] {
     const v = row[i]
     return typeof v === 'number' && Number.isFinite(v) ? v : null
   }
+
+  // Connect returns chart values in the descriptor's unit, which can differ
+  // from the summary's SI units. The descriptor factor is storage metadata;
+  // chart values are already scaled. Never infer units from the speed itself.
+  const speedUnit = descriptors.find(d => d.key === 'directSpeed')?.unit?.key
+  const speedScale = speedUnit === undefined || speedUnit === 'mps' ? 1
+    : speedUnit === 'kph' ? 1 / 3.6
+    : speedUnit === 'mph' ? 0.44704 : null
 
   const samples: ActivityDetailSample[] = []
   let wall = 0
@@ -119,7 +127,8 @@ export function parseActivityDetails(details: unknown): ActivityDetailSample[] {
     }
     const hr = value(metrics, at.hr)
     const power = value(metrics, at.power)
-    const speed = value(metrics, at.speed)
+    const rawSpeed = value(metrics, at.speed)
+    const speed = rawSpeed !== null && speedScale !== null ? rawSpeed * speedScale : null
     samples.push({ seconds, heartRate: hr && hr > 0 ? hr : null, power: power !== null && power >= 0 ? power : null, speed: speed !== null && speed >= 0 ? speed : null })
   }
   return samples
