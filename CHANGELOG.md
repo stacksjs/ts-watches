@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.20...v0.1.21)
+
+## 🐛 Bug Fixes
+
+- **garmin**: preserve sign-in throttles and support reusable sessions ([b27a370](https://github.com/stacksjs/ts-watches/commit/b27a370)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.21 ([9fce01c](https://github.com/stacksjs/ts-watches/commit/9fce01c)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.19...v0.1.20)
 
 ## 🚀 Features
