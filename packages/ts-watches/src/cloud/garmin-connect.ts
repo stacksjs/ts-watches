@@ -1,6 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { GarminConnect } from 'ts-garmin'
+import type { IGarminTokens } from 'ts-garmin'
+
+/** Opaque provider sessions: store encrypted and bind them to their account. */
+export type GarminConnectSession = IGarminTokens
 import { parseGarminLactateThreshold } from './garmin-lactate-threshold'
 import type { GarminLactateThreshold } from './garmin-lactate-threshold'
 import { parseGarminCyclingFtp, parseGarminHeartRateThresholds } from './garmin-profile-thresholds'
@@ -240,6 +244,21 @@ export class GarminConnectClient {
     }
     await this.client.login()
     this.isLoggedIn = true
+  }
+
+  /** Restore the same account's session without submitting its password again. */
+  restoreSession(session: GarminConnectSession): void {
+    if (!this.client) throw new Error('Credentials required before restoring a Garmin session')
+    if (!session?.oauth1?.oauth_token || !session.oauth1.oauth_token_secret || !session?.oauth2?.access_token)
+      throw new Error('Invalid Garmin session')
+    this.client.loadToken(session.oauth1, session.oauth2)
+    this.isLoggedIn = true
+  }
+
+  /** Includes refreshed access tokens after any API calls. */
+  exportSession(): GarminConnectSession {
+    this.ensureLoggedIn()
+    return this.client.exportToken()
   }
 
   async getUserProfile(): Promise<{ displayName: string, profileId: string }> {

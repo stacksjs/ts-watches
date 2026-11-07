@@ -12,8 +12,29 @@ const USER_AGENT_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 
 const OAUTH_CONSUMER_URL = 'https://thegarth.s3.amazonaws.com/oauth_consumer.json'
 
-let isRefreshing = false
-let refreshSubscribers: ((_token: string) => void)[] = []
+/** Keep provider throttles visible without including credentials or response HTML. */
+export class GarminHttpError extends Error {
+  readonly status: number
+  readonly retryAfterSeconds?: number
+  readonly retryAt?: string
+  constructor(response: Response, stage: string) {
+    super(`HTTP Error: ${response.status} - Garmin ${stage}${response.status === 429 ? ': rate limited' : ''}`)
+    this.name = 'GarminHttpError'
+    this.status = response.status
+    const header = response.headers.get('retry-after')
+    const seconds = header && /^\d+$/.test(header.trim()) ? Number(header) : NaN
+    const date = header ? Date.parse(header) : NaN
+    const delay = Number.isFinite(seconds) ? seconds : Number.isFinite(date) ? Math.max(0, Math.ceil((date - Date.now()) / 1000)) : response.status === 429 ? 3600 : undefined
+    if (delay !== undefined) {
+      this.retryAfterSeconds = delay
+      this.retryAt = new Date(Date.now() + delay * 1000).toISOString()
+    }
+  }
+}
+
+function requireSuccess(response: Response, stage: string): void {
+  if (!response.ok) throw new GarminHttpError(response, stage)
+}
 
 function encodeRFC3986(str: string): string {
   return encodeURIComponent(str).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
@@ -122,6 +143,7 @@ export class HttpClient {
   oauth2Token: IOauth2Token | undefined
   OAUTH_CONSUMER: IOauth1Consumer | undefined
   private cookies: Map<string, string> = new Map()
+  private refreshing: Promise<void> | undefined
 
   constructor(url: UrlClass) {
     this.url = url
@@ -150,6 +172,7 @@ export class HttpClient {
 
   async fetchOauthConsumer(): Promise<void> {
     const response = await fetch(OAUTH_CONSUMER_URL)
+    requireSuccess(response, 'OAuth consumer')
     const data = await response.json() as { consumer_key: string, consumer_secret: string }
     this.OAUTH_CONSUMER = {
       key: data.consumer_key,
@@ -161,7 +184,6 @@ export class HttpClient {
     if (this.oauth2Token) {
       const nowSeconds = Math.floor(Date.now() / 1000)
       if (this.oauth2Token.expires_at < nowSeconds) {
-        console.error('Token expired!')
         await this.refreshOauth2Token()
       }
     }
@@ -189,28 +211,11 @@ export class HttpClient {
     this.extractCookies(response)
 
     if (response.status === 401 && this.oauth2Token && !_retry) {
-      if (isRefreshing) {
-        const token = await new Promise<string>((resolve) => {
-          refreshSubscribers.push(resolve)
-        })
-        headers.Authorization = `Bearer ${token}`
-        return this.makeRequest(url, { ...options, headers, _retry: true })
-      }
-
-      isRefreshing = true
       await this.refreshOauth2Token()
-      isRefreshing = false
-      refreshSubscribers.forEach(sub => sub(this.oauth2Token!.access_token))
-      refreshSubscribers = []
-
-      headers.Authorization = `Bearer ${this.oauth2Token.access_token}`
-      return this.makeRequest(url, { ...options, headers, _retry: true })
+      return this.makeRequest(url, { ...options, _retry: true })
     }
 
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${text}`)
-    }
+    requireSuccess(response, 'API')
 
     // Asked for bytes, so bytes: a download must not come back parsed just
     // because the server labelled it JSON.
@@ -312,6 +317,7 @@ export class HttpClient {
     }
     const step1Url = `${this.url.GARMIN_SSO_EMBED}?${stringifyParams(step1Params)}`
     const step1Response = await fetch(step1Url)
+    requireSuccess(step1Response, 'sign-in embed')
     this.extractCookies(step1Response)
 
     // Step2: Get _csrf
@@ -327,6 +333,7 @@ export class HttpClient {
         Cookie: this.getCookieHeader(),
       },
     })
+    requireSuccess(step2Response, 'sign-in form')
     this.extractCookies(step2Response)
     const step2Result = await step2Response.text()
 
@@ -368,6 +375,7 @@ export class HttpClient {
       },
       body: formData.toString(),
     })
+    requireSuccess(step3Response, 'sign-in')
     this.extractCookies(step3Response)
     const step3Result = await step3Response.text()
 
@@ -401,6 +409,11 @@ export class HttpClient {
   }
 
   async refreshOauth2Token(): Promise<void> {
+    this.refreshing ??= this.exchangeCurrentTokens().finally(() => { this.refreshing = undefined })
+    return this.refreshing
+  }
+
+  private async exchangeCurrentTokens(): Promise<void> {
     if (!this.OAUTH_CONSUMER) {
       await this.fetchOauthConsumer()
     }
@@ -432,6 +445,7 @@ export class HttpClient {
       },
     })
 
+    requireSuccess(response, 'OAuth authorization')
     const responseText = await response.text()
     const token = parseQueryString(responseText) as unknown as IOauth1Token
     this.oauth1Token = token
@@ -461,6 +475,7 @@ export class HttpClient {
       },
     })
 
+    requireSuccess(response, 'OAuth exchange')
     const responseData = await response.json() as IOauth2Token
     this.oauth2Token = this.setOauth2TokenExpiresAt(responseData)
   }

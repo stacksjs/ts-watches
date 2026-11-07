@@ -12,6 +12,7 @@ export {
   type DailySummary,
   type GarminActivitySummary as GarminConnectActivitySummary,
   type GarminConnectConfig,
+  type GarminConnectSession,
   type GarminConnectSchedule,
   type GarminConnectWorkout,
   type GarminConnectWorkoutRef,
