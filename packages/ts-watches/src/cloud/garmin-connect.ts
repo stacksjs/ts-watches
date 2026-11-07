@@ -281,6 +281,13 @@ export class GarminConnectClient {
     return this.trainingMetric('trainingreadiness', date)
   }
 
+  /** Exact provider endurance score for a calendar day, without range aggregation. */
+  async getEnduranceScore(date: string): Promise<unknown> {
+    this.ensureLoggedIn()
+    this.metricDay(date)
+    return this.client.get(`https://connectapi.garmin.com/metrics-service/metrics/endurancescore?calendarDate=${date}`)
+  }
+
   /** Aggregated status includes the primary device's acute load and VO2 max. */
   async getTrainingStatus(date: string): Promise<unknown> {
     return this.trainingMetric('trainingstatus/aggregated', date)
