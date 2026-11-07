@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.21...v0.1.22)
+
+## 🚀 Features
+
+- expose daily Garmin endurance scores ([523bf89](https://github.com/stacksjs/ts-watches/commit/523bf89)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.22 ([c747741](https://github.com/stacksjs/ts-watches/commit/c747741)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-watches/compare/v0.1.20...v0.1.21)
 
 ## 🐛 Bug Fixes
